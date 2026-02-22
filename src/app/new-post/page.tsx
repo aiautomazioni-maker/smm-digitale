@@ -1,4 +1,5 @@
 "use client";
+// Force rebuild for Vercel deployment verification
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
