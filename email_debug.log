@@ -1,0 +1,84 @@
+
+----------------------------------------------------------------
+DATE: 2026-02-15T10:28:51.502Z
+📧 MOCK EMAIL SENT 📧
+To: testuser@example.com
+Subject: Benvenuto in Test User - Verifica la tua Email
+Link: http://localhost:3000/verify?token=3ac1a2f691e52afdddb103d80dc0fd41b23bfc2435a9bb5fbca426e6e0d67e83&email=testuser%40example.com
+Body:
+Ciao! Grazie per esserti registrato.
+
+Per iniziare a usare Test User, verifica il tuo indirizzo email cliccando qui:
+http://localhost:3000/verify?token=3ac1a2f691e52afdddb103d80dc0fd41b23bfc2435a9bb5fbca426e6e0d67e83&email=testuser%40example.com
+
+Se non hai richiesto questa email, ignorala.
+----------------------------------------------------------------
+
+[2026-02-15T11:20:04.016Z] 📧 INVOICE EMAIL SENT 📧
+To: testuser@example.com
+Subject: Fattura Micro - Pagamento Confermato
+Body:
+
+    FATTURA N. INV-1771154403996-61
+    Data: 15/02/2026
+    --------------------------------------------------
+    Cliente: testuser@example.com (testuser@example.com)
+    Metodo: Carta di Credito (Stripe Secure)
+    --------------------------------------------------
+    Descrizione                 | Importo
+    --------------------------------------------------
+    SMM Digitale - Piano Micro | €19.00
+    --------------------------------------------------
+    TOTALE                      | €19.00
+    --------------------------------------------------
+    Stato: PAGATO
+    Grazie per il tuo acquisto!
+    
+----------------------------------------------------------------
+
+
+[2026-02-15T11:21:15.320Z] 📧 INVOICE EMAIL SENT 📧
+To: testuser@example.com
+Subject: Fattura Micro - Pagamento Confermato
+Body:
+
+    FATTURA N. INV-1771154475320-174
+    Data: 15/02/2026
+    --------------------------------------------------
+    Cliente: testuser@example.com (testuser@example.com)
+    Metodo: Carta di Credito (Stripe Secure)
+    --------------------------------------------------
+    Descrizione                 | Importo
+    --------------------------------------------------
+    SMM Digitale - Piano Micro | €19.00
+    --------------------------------------------------
+    TOTALE                      | €19.00
+    --------------------------------------------------
+    Stato: PAGATO
+    Grazie per il tuo acquisto!
+    
+----------------------------------------------------------------
+
+
+[2026-02-15T13:06:06.654Z] 📧 INVOICE EMAIL SENT 📧
+To: testuser@example.com
+Subject: Fattura Starter - Pagamento Confermato
+Body:
+
+    FATTURA N. INV-1771160766649-433
+    Data: 15/02/2026
+    --------------------------------------------------
+    Cliente: testuser@example.com (testuser@example.com)
+    Metodo: Carta di Credito (Stripe Secure)
+    --------------------------------------------------
+    Descrizione                 | Importo
+    --------------------------------------------------
+    SMM Digitale - Piano Starter | €49.00
+    --------------------------------------------------
+    TOTALE                      | €49.00
+    --------------------------------------------------
+    Stato: PAGATO
+    Grazie per il tuo acquisto!
+    
+----------------------------------------------------------------
+

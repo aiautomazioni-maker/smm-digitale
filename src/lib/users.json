@@ -1,0 +1,14 @@
+[
+  {
+    "id": "8ec49c0d-88c0-4d46-87c5-101e90f78e5c",
+    "email": "testuser@example.com",
+    "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "full_name": "Test User",
+    "workspace_name": "Test User",
+    "email_verified": true,
+    "email_verification_token_hash": null,
+    "email_verification_expires_at": null,
+    "credits": 410,
+    "plan": "Starter"
+  }
+]
