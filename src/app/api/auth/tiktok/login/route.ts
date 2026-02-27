@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import crypto from 'crypto';
 
 export async function GET(req: Request) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
@@ -21,12 +23,27 @@ export async function GET(req: Request) {
     // CSRF Protection
     const state = Math.random().toString(36).substring(7);
 
+    // PKCE implementation
+    const codeVerifier = crypto.randomBytes(32).toString('base64url');
+    const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
+
+    // Store the verifier in a cookie to use later in the callback
+    const cookieStore = await cookies();
+    cookieStore.set('tiktok_code_verifier', codeVerifier, {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 600, // 10 minutes is enough for login
+        path: '/',
+    });
+
     const params = new URLSearchParams({
         client_key: clientKey,
         scope: scope,
         response_type: 'code',
         redirect_uri: redirectUri,
         state: state,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
     });
 
     const authUrl = `${baseUrl}?${params.toString()}`;

@@ -18,6 +18,13 @@ export async function GET(req: Request) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
     const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
 
+    const cookieStore = await cookies();
+    const codeVerifier = cookieStore.get('tiktok_code_verifier')?.value;
+
+    if (!codeVerifier) {
+        return NextResponse.json({ error: 'Missing code verifier (PKCE)' }, { status: 400 });
+    }
+
     const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const redirectUri = `${origin}/api/auth/tiktok/callback`;
 
@@ -34,6 +41,7 @@ export async function GET(req: Request) {
                 code: code,
                 grant_type: 'authorization_code',
                 redirect_uri: redirectUri,
+                code_verifier: codeVerifier,
             }),
         });
 
