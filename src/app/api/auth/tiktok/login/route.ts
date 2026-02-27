@@ -4,7 +4,8 @@ import crypto from 'crypto';
 
 export async function GET(req: Request) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
-    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const url = new URL(req.url);
+    const origin = `${url.protocol}//${url.host}`;
     const redirectUri = `${origin}/api/auth/tiktok/callback`;
 
     if (!clientKey) {

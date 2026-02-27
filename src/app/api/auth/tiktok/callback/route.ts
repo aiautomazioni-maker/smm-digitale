@@ -21,12 +21,13 @@ export async function GET(req: Request) {
     const cookieStore = await cookies();
     const codeVerifier = cookieStore.get('tiktok_code_verifier')?.value;
 
+    const url = new URL(req.url);
+    const origin = `${url.protocol}//${url.host}`;
+    const redirectUri = `${origin}/api/auth/tiktok/callback`;
+
     if (!codeVerifier) {
         return NextResponse.json({ error: 'Missing code verifier (PKCE)' }, { status: 400 });
     }
-
-    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const redirectUri = `${origin}/api/auth/tiktok/callback`;
 
     try {
         // Exchange code for Access Token
