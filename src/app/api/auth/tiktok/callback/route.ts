@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { cookies } from 'next/headers';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -19,6 +18,9 @@ export async function GET(req: Request) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
     const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
 
+    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const redirectUri = `${origin}/api/auth/tiktok/callback`;
+
     try {
         // Exchange code for Access Token
         const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
                 client_secret: clientSecret!,
                 code: code,
                 grant_type: 'authorization_code',
-                redirect_uri: process.env.TIKTOK_REDIRECT_URI!,
+                redirect_uri: redirectUri,
             }),
         });
 
@@ -46,12 +48,14 @@ export async function GET(req: Request) {
         const accessToken = data.access_token;
         const openId = data.open_id;
 
-        // In a real app, save this to the database for the current workspace
-        // For this prototype, we'll append it to .env.local to "simulate" persistence
-        const envPath = '/Users/gillesvalenti/.gemini/antigravity/playground/celestial-oort/smm-digitale/.env.local';
-        const envContent = `\nTIKTOK_ACCESS_TOKEN="${accessToken}"\nTIKTOK_OPEN_ID="${openId}"\n`;
-
-        fs.appendFileSync(envPath, envContent);
+        // Store in a secure cookie instead of local fs, since Vercel is readonly
+        const cookieStore = await cookies();
+        cookieStore.set('tiktok_access_token', accessToken, {
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: true,
+            maxAge: 86400, // 24 hours
+            path: '/',
+        });
 
         // Redirect back to settings with a success message
         return NextResponse.redirect(new URL('/settings?tiktok=success', req.url));

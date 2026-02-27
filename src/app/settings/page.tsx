@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { checkTikTokConnection } from "./actions";
 import { useTranslation } from "@/context/LanguageContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,12 +22,20 @@ function SettingsPageContent() {
     const [profile, setProfile] = useState({ name: "Test User", email: "testuser@example.com" });
     const [aiPrefs, setAiPrefs] = useState({ tone: "friendly", length: "medium", creativity: "0.8" });
     const [notifications, setNotifications] = useState({ emailPosts: true, weeklyReport: true, creditAlerts: false });
+    const [isTikTokConnected, setIsTikTokConnected] = useState(false);
 
     const searchParams = useSearchParams();
     const router = useRouter();
 
     useEffect(() => {
+        const checkConnection = async () => {
+            const connected = await checkTikTokConnection();
+            setIsTikTokConnected(connected);
+        };
+        checkConnection();
+
         if (searchParams.get('tiktok') === 'success') {
+            setIsTikTokConnected(true);
             toast.success("TikTok collegato con successo!");
             // Remove param from URL
             router.replace('/settings');
@@ -104,7 +113,7 @@ function SettingsPageContent() {
                                 { name: 'Instagram', connected: true, accountName: '@caffeartisan' },
                                 { name: 'Facebook', connected: false, accountName: null },
                                 { name: 'LinkedIn', connected: true, accountName: 'Caffè Artisan Srl' },
-                                { name: 'TikTok', connected: false, accountName: null }
+                                { name: 'TikTok', connected: isTikTokConnected, accountName: isTikTokConnected ? '@testcreator' : null }
                             ].map(social => (
                                 <div key={social.name} className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                                     <div className="flex items-center gap-4">

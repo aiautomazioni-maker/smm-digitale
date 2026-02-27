@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(req: Request) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
-    const redirectUri = process.env.TIKTOK_REDIRECT_URI;
+    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const redirectUri = `${origin}/api/auth/tiktok/callback`;
 
-    if (!clientKey || !redirectUri) {
+    if (!clientKey) {
         return NextResponse.json({ error: 'TikTok configuration missing' }, { status: 500 });
     }
 

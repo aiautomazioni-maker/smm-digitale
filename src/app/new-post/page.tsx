@@ -683,9 +683,10 @@ function NewPostWizardContent() {
                         <div className="space-y-2">
                             <Label>Destinazione (Pubblicazione Immediata)</Label>
                             <Tabs value={selectedPlatform} onValueChange={setSelectedPlatform} className="w-full">
-                                <TabsList className="grid w-full grid-cols-2 bg-black/40">
-                                    <TabsTrigger value="facebook" className="data-[state=active]:bg-blue-600">Facebook Page</TabsTrigger>
-                                    <TabsTrigger value="instagram" className="data-[state=active]:bg-pink-600">Instagram</TabsTrigger>
+                                <TabsList className="grid w-full grid-cols-3 bg-black/40">
+                                    <TabsTrigger value="facebook" className="data-[state=active]:bg-blue-600 text-[10px] sm:text-sm">Facebook</TabsTrigger>
+                                    <TabsTrigger value="instagram" className="data-[state=active]:bg-pink-600 text-[10px] sm:text-sm">Instagram</TabsTrigger>
+                                    <TabsTrigger value="tiktok" className="data-[state=active]:bg-zinc-800 text-[10px] sm:text-sm">TikTok</TabsTrigger>
                                 </TabsList>
                             </Tabs>
                         </div>
@@ -697,12 +698,18 @@ function NewPostWizardContent() {
                                 Pianifica nel Calendario
                             </Button>
                             <Button
-                                className={`flex-1 ${selectedPlatform === 'facebook' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-pink-600 hover:bg-pink-700'}`}
+                                className={`flex-1 ${selectedPlatform === 'facebook' ? 'bg-blue-600 hover:bg-blue-700' :
+                                        selectedPlatform === 'instagram' ? 'bg-pink-600 hover:bg-pink-700' :
+                                            'bg-zinc-900 hover:bg-black border border-white/20'
+                                    }`}
                                 onClick={handlePublishNow}
                                 disabled={isPublishing}
                             >
                                 {isPublishing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
-                                Pubblica su {selectedPlatform === 'facebook' ? 'FB' : 'IG'}
+                                Pubblica su {
+                                    selectedPlatform === 'facebook' ? 'FB' :
+                                        selectedPlatform === 'instagram' ? 'IG' : 'TikTok'
+                                }
                             </Button>
                         </div>
                     </CardContent>
