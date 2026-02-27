@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     // user.info.basic: Basic profile info
     // video.upload: Required for Video Kit
     // video.publish: Required for Direct Post
-    const scope = 'user.info.basic';
+    const scope = 'user.info.basic,video.upload,video.publish';
 
     // CSRF Protection
     const state = Math.random().toString(36).substring(7);
