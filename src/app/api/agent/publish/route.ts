@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { normalizePostPayload, PostInput } from '@/lib/post-normalizer';
 import { createClient } from '@supabase/supabase-js';
 
@@ -471,6 +472,59 @@ export async function POST(req: Request) {
             } catch (err: any) {
                 console.error("TikTok Publish Catch:", err);
                 return NextResponse.json({ error: `TikTok publish failed: ${err.message}` }, { status: 500 });
+            }
+        }
+
+        if (platform === 'tiktok') {
+            const cookieStore = await cookies();
+            const TIKTOK_ACCESS_TOKEN = cookieStore.get('tiktok_access_token')?.value || process.env.TIKTOK_ACCESS_TOKEN;
+            if (!TIKTOK_ACCESS_TOKEN) {
+                return NextResponse.json({
+                    simulated: true,
+                    message: "No TikTok Token provided. Simulation mode.",
+                    normalized_payload: payload,
+                    warnings: [...normalized.warnings, "Missing TIKTOK_ACCESS_TOKEN"]
+                });
+            }
+
+            console.log(`[PUBLISH] Format: ${payload.content_type}, Platform: tiktok`);
+
+            // TikTok Direct Post (Video)
+            // For this prototype we prefer PULL_FROM_URL as it's cleaner for server-to-server with cloud images/videos
+            const videoUrl = payload.media_urls[0];
+
+            try {
+                const ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TIKTOK_ACCESS_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_info: {
+                            title: payload.caption_final.substring(0, 2200), // TikTok title/caption limit
+                            video_url: videoUrl
+                        },
+                        source_type: 'PULL_FROM_URL'
+                    })
+                });
+
+                const ttData = await ttRes.json();
+
+                if (ttData.error) {
+                    console.error("TikTok Publish Error:", ttData.error);
+                    return NextResponse.json({ error: ttData.error.message || "TikTok API Error" }, { status: 400 });
+                }
+
+                return NextResponse.json({
+                    success: true,
+                    publishId: ttData.data?.publish_id,
+                    normalized_payload: payload
+                });
+
+            } catch (err: any) {
+                console.error("TikTok Publish Exception:", err);
+                return NextResponse.json({ error: `TikTok Request Failed: ${err.message}` }, { status: 500 });
             }
         }
 
