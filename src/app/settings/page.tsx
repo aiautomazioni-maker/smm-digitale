@@ -16,6 +16,7 @@ import { toast } from "sonner";
 function SettingsPageInner() {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
+    const [tiktokConnected, setTiktokConnected] = useState(false);
 
     // Form states (mocked for UI)
     const [profile, setProfile] = useState({ name: "Test User", email: "testuser@example.com" });
@@ -25,18 +26,37 @@ function SettingsPageInner() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
+    const checkConnections = async () => {
+        try {
+            const res = await fetch('/api/auth/connections');
+            const data = await res.json();
+            setTiktokConnected(data.tiktok || false);
+        } catch (e) {
+            console.error('Failed to check connections:', e);
+        }
+    };
+
     useEffect(() => {
+        checkConnections();
         if (searchParams.get('tiktok') === 'success') {
             toast.success("TikTok collegato con successo!");
-            // Remove param from URL
+            setTiktokConnected(true);
             router.replace('/settings');
         }
     }, [searchParams, router]);
 
+
     const handleConnectTikTok = () => {
         setLoading(true);
-        // Redirect to our internal login bridge
         window.location.href = '/api/auth/tiktok/login';
+    };
+
+    const handleDisconnectTikTok = async () => {
+        try {
+            await fetch('/api/auth/tiktok/disconnect', { method: 'POST' });
+        } catch (e) { /* ignore */ }
+        setTiktokConnected(false);
+        toast.success('TikTok disconnesso.');
     };
 
     const handleSave = () => {
@@ -103,8 +123,8 @@ function SettingsPageInner() {
                             {[
                                 { name: 'Instagram', connected: true, accountName: '@caffeartisan' },
                                 { name: 'Facebook', connected: false, accountName: null },
-                                { name: 'LinkedIn', connected: true, accountName: 'Caffè Artisan Srl' },
-                                { name: 'TikTok', connected: false, accountName: null }
+                                { name: 'LinkedIn', connected: false, accountName: null },
+                                { name: 'TikTok', connected: tiktokConnected, accountName: tiktokConnected ? 'Connesso' : null }
                             ].map(social => (
                                 <div key={social.name} className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                                     <div className="flex items-center gap-4">
@@ -127,16 +147,14 @@ function SettingsPageInner() {
                                     <Button
                                         variant={social.connected ? "outline" : "default"}
                                         size="sm"
-                                        className={social.connected ? "border-white/10" : "bg-white text-black hover:bg-white/90"}
+                                        className={social.connected ? "border-white/10 text-red-400 hover:text-red-300" : "bg-white text-black hover:bg-white/90"}
                                         onClick={() => {
-                                            if (social.name === 'TikTok' && !social.connected) {
-                                                handleConnectTikTok();
-                                            } else if (!social.connected) {
-                                                handleSave();
-                                            }
+                                            if (social.name === 'TikTok' && !social.connected) handleConnectTikTok();
+                                            else if (social.name === 'TikTok' && social.connected) handleDisconnectTikTok();
+                                            else if (!social.connected) handleSave();
                                         }}
                                     >
-                                        {social.connected ? "Disconnetti" : <><LinkIcon className="w-4 h-4 mr-2" /> Connetti</>}
+                                        {social.connected ? 'Disconnetti' : <><LinkIcon className="w-4 h-4 mr-2" /> Connetti</>}
                                     </Button>
                                 </div>
                             ))}
