@@ -413,27 +413,24 @@ export async function POST(req: Request) {
             console.log("[PUBLISH] Handling TikTok Video upload...");
             const mediaUrl = payload.media_urls[0];
 
-            // VALIDATION: TikTok solo video
-            if (!mediaUrl || !mediaUrl.toLowerCase().includes('.mp4') && !mediaUrl.startsWith('data:video/mp4')) {
-                // If the URL doesn't look like a video, we might be trying to post an image (not allowed natively as standard post)
-                return NextResponse.json({ error: 'TikTok richiede obbligatoriamente un formato video (.mp4)' }, { status: 400 });
+            // VALIDATION: TikTok requires an MP4 video URL
+            if (!mediaUrl) {
+                return NextResponse.json({ error: 'TikTok richiede un video (.mp4)' }, { status: 400 });
             }
 
-            const TIKTOK_ACCESS_TOKEN = process.env.TIKTOK_ACCESS_TOKEN;
+            // Get the token: first from the httpOnly cookie (set by OAuth callback), then env fallback
+            const cookieStore = await cookies();
+            const TIKTOK_ACCESS_TOKEN = cookieStore.get('tiktok_access_token')?.value
+                || process.env.TIKTOK_ACCESS_TOKEN;
 
             if (!TIKTOK_ACCESS_TOKEN) {
-                // Return simulation mode if no token
                 return NextResponse.json({
-                    simulated: true,
-                    message: "No TikTok Token provided. Simulation mode active.",
-                    platform: 'tiktok',
+                    error: 'TikTok non collegato. Vai in Impostazioni → Social → Connetti TikTok.',
+                    code: 'TIKTOK_NOT_CONNECTED',
                     normalized_payload: payload,
-                    warnings: ["Publishing to TikTok requires a valid user access token."]
-                });
+                }, { status: 401 });
             }
 
-            // Real TikTok implementation using Content Posting API (Unified flow)
-            // https://developers.tiktok.com/doc/content-posting-api-reference-post-publish-video-init/
             try {
                 const initRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
                     method: 'POST',
@@ -443,7 +440,7 @@ export async function POST(req: Request) {
                     },
                     body: JSON.stringify({
                         post_info: {
-                            title: payload.caption_final.substring(0, 150), // TikTok title limit
+                            title: payload.caption_final.substring(0, 150),
                             privacy_level: "PUBLIC_TO_EVERYONE",
                             disable_duet: false,
                             disable_comment: false,
@@ -458,9 +455,12 @@ export async function POST(req: Request) {
                 });
 
                 const initData = await initRes.json();
-                if (initData.error) {
-                    console.error("TikTok API Error:", initData.error);
-                    return NextResponse.json({ error: initData.error.message }, { status: 400 });
+                console.log("[TIKTOK] Init response:", JSON.stringify(initData));
+
+                if (initData.error || initData.data?.error) {
+                    const errMsg = initData.error?.message || initData.data?.error?.message || "TikTok API Error";
+                    console.error("TikTok Init Error:", errMsg);
+                    return NextResponse.json({ error: errMsg }, { status: 400 });
                 }
 
                 return NextResponse.json({
@@ -472,59 +472,6 @@ export async function POST(req: Request) {
             } catch (err: any) {
                 console.error("TikTok Publish Catch:", err);
                 return NextResponse.json({ error: `TikTok publish failed: ${err.message}` }, { status: 500 });
-            }
-        }
-
-        if (platform === 'tiktok') {
-            const cookieStore = await cookies();
-            const TIKTOK_ACCESS_TOKEN = cookieStore.get('tiktok_access_token')?.value || process.env.TIKTOK_ACCESS_TOKEN;
-            if (!TIKTOK_ACCESS_TOKEN) {
-                return NextResponse.json({
-                    simulated: true,
-                    message: "No TikTok Token provided. Simulation mode.",
-                    normalized_payload: payload,
-                    warnings: [...normalized.warnings, "Missing TIKTOK_ACCESS_TOKEN"]
-                });
-            }
-
-            console.log(`[PUBLISH] Format: ${payload.content_type}, Platform: tiktok`);
-
-            // TikTok Direct Post (Video)
-            // For this prototype we prefer PULL_FROM_URL as it's cleaner for server-to-server with cloud images/videos
-            const videoUrl = payload.media_urls[0];
-
-            try {
-                const ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${TIKTOK_ACCESS_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        post_info: {
-                            title: payload.caption_final.substring(0, 2200), // TikTok title/caption limit
-                            video_url: videoUrl
-                        },
-                        source_type: 'PULL_FROM_URL'
-                    })
-                });
-
-                const ttData = await ttRes.json();
-
-                if (ttData.error) {
-                    console.error("TikTok Publish Error:", ttData.error);
-                    return NextResponse.json({ error: ttData.error.message || "TikTok API Error" }, { status: 400 });
-                }
-
-                return NextResponse.json({
-                    success: true,
-                    publishId: ttData.data?.publish_id,
-                    normalized_payload: payload
-                });
-
-            } catch (err: any) {
-                console.error("TikTok Publish Exception:", err);
-                return NextResponse.json({ error: `TikTok Request Failed: ${err.message}` }, { status: 500 });
             }
         }
 
