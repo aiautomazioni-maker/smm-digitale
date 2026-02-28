@@ -64,8 +64,9 @@ export default function VideoProjectInitiator() {
             const data = await res.json();
 
             if (!res.ok || data.error || !data.signedUrl) {
-                console.error("Server signature error:", data.error);
-                throw new Error("Impossibile generare URL di upload");
+                const errorMsg = data.error || "Impossibile generare URL di upload";
+                console.error("Server signature error:", errorMsg);
+                throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
             }
 
             // STEP 2: Upload directly to Supabase using the signed URL/token
@@ -75,16 +76,21 @@ export default function VideoProjectInitiator() {
 
             if (uploadError) {
                 console.error("Direct upload to Supabase failed:", uploadError);
-                throw new Error("Caricamento diretto fallito");
+                throw new Error(`Caricamento diretto fallito: ${uploadError.message}`);
             }
 
             setUploadedVideoUrl(data.publicUrl);
             toast.success('Video caricato su cloud con successo!');
-        } catch (err) {
+        } catch (err: any) {
             console.error("Upload error:", err);
             const blobUrl = URL.createObjectURL(file);
             setUploadedVideoUrl(blobUrl);
-            toast.warning('Upload cloud fallito. Video caricato localmente.');
+
+            const errorMessage = err.message || 'Errore sconosciuto';
+            toast.warning(`Upload cloud fallito (${errorMessage}). Video caricato localmente.`);
+
+            // Also toast the specific error for debugging
+            toast.error(`Dettaglio ERRORE: ${errorMessage}`, { duration: 10000 });
         } finally {
             setIsUploading(false);
         }
