@@ -432,6 +432,16 @@ export async function POST(req: Request) {
             }
 
             try {
+                // Step 1: Download the video server-side
+                console.log("[TIKTOK] Downloading video from:", mediaUrl);
+                const videoRes = await fetch(mediaUrl);
+                if (!videoRes.ok) throw new Error(`Failed to fetch video: ${videoRes.statusText}`);
+                const videoBuffer = Buffer.from(await videoRes.arrayBuffer());
+                const videoSize = videoBuffer.length;
+                console.log(`[TIKTOK] Video size: ${videoSize} bytes`);
+
+                // Step 2: Init the upload with FILE_UPLOAD (no domain verification needed)
+                const CHUNK_SIZE = videoSize; // single chunk for simplicity
                 const initRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
                     method: 'POST',
                     headers: {
@@ -448,8 +458,10 @@ export async function POST(req: Request) {
                             video_cover_timestamp_ms: 1000
                         },
                         source_info: {
-                            source: "PULL_FROM_URL",
-                            video_url: mediaUrl
+                            source: "FILE_UPLOAD",
+                            video_size: videoSize,
+                            chunk_size: CHUNK_SIZE,
+                            total_chunk_count: 1
                         }
                     })
                 });
@@ -457,15 +469,37 @@ export async function POST(req: Request) {
                 const initData = await initRes.json();
                 console.log("[TIKTOK] Init response:", JSON.stringify(initData));
 
-                if (initData.error || initData.data?.error) {
-                    const errMsg = initData.error?.message || initData.data?.error?.message || "TikTok API Error";
+                if (initData.error || !initData.data?.upload_url) {
+                    const errMsg = initData.error?.message || initData.data?.error?.message || "TikTok Init failed";
                     console.error("TikTok Init Error:", errMsg);
                     return NextResponse.json({ error: errMsg }, { status: 400 });
                 }
 
+                const uploadUrl = initData.data.upload_url;
+                const publishId = initData.data.publish_id;
+
+                // Step 3: Upload the video bytes directly to TikTok
+                console.log("[TIKTOK] Uploading video bytes to TikTok...");
+                const uploadRes = await fetch(uploadUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'video/mp4',
+                        'Content-Range': `bytes 0-${videoSize - 1}/${videoSize}`,
+                        'Content-Length': videoSize.toString()
+                    },
+                    body: videoBuffer as any
+                });
+
+                if (!uploadRes.ok) {
+                    const errText = await uploadRes.text();
+                    console.error("TikTok Upload Error:", errText);
+                    return NextResponse.json({ error: `TikTok upload failed: ${errText}` }, { status: 400 });
+                }
+
+                console.log("[TIKTOK] Upload complete! publish_id:", publishId);
                 return NextResponse.json({
                     success: true,
-                    publish_id: initData.data?.publish_id,
+                    publish_id: publishId,
                     normalized_payload: payload
                 });
 
