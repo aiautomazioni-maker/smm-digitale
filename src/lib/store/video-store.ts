@@ -20,6 +20,7 @@ export interface VideoProjectContext {
     style_keywords: string[];
     platform_targets: string[];
     specs: VideoSpecs;
+    original_video_url?: string;
 }
 
 export interface FullVideoPlan {

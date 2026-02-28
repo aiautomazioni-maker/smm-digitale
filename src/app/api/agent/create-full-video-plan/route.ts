@@ -181,6 +181,12 @@ Respond ONLY with valid JSON. No markdown backticks. All text in ${lang}.
         const rawJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
         const parsedJson = JSON.parse(rawJson);
 
+      // Inject the original uploaded video URL so the timeline editor has access to it
+      if (source?.media_url) {
+        if (!parsedJson.video_project) parsedJson.video_project = {};
+        parsedJson.video_project.original_video_url = source.media_url;
+      }
+
         return NextResponse.json(parsedJson);
 
     } catch (error: any) {

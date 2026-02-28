@@ -86,6 +86,18 @@ export default function VideoTimelineEditor() {
         if (!fullPlan) return;
         setIsPublishing(true);
         try {
+            // Prefer the generated/rendered media URL first. 
+            // If it's a direct upload (no render), fallback to the original uploaded URL in the EDL or manifest.
+            const targetMediaUrl = fullPlan.publish_jobs?.[0]?.media_url
+                || fullPlan.video_project?.original_video_url
+                || '';
+
+            if (!targetMediaUrl || targetMediaUrl.includes('example.com')) {
+                toast.error("Nessun video valido trovato per la pubblicazione.");
+                setIsPublishing(false);
+                return;
+            }
+
             const res = await fetch('/api/agent/publish', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -97,7 +109,7 @@ export default function VideoTimelineEditor() {
                         content_type: 'reel',
                         caption: fullPlan.copy?.caption || "",
                         hashtags: fullPlan.copy?.hashtags || [],
-                        media_urls: [fullPlan.publish_jobs?.[0]?.media_url || 'https://example.com/demo.mp4'], // Fallback for demo
+                        media_urls: [targetMediaUrl],
                         audio_url: fullPlan.editor_edl?.audio?.url
                     }
                 })
