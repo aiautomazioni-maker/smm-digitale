@@ -173,7 +173,7 @@ Respond ONLY with valid JSON. No markdown backticks. All text in ${lang}.
             copy: { caption: "Progetto Demo", cta: "Link in bio", hashtags: ["#demo"], emoji_level: "medium" },
             cover_options: [{ option_index: 1, title: "Cover Demo", hook_text: "Demo Hook", prompt_en: "cover prompt", negative_prompt_en: "", specs: { width: 1080, height: 1920, aspect_ratio: "9:16" }, thumbnail_safe_crop: { center_box_pct: 60, notes: ["Keep center"] }, overlay_plan: [] }],
             publish_jobs: targets.map((t: string) => ({ platform: t, content_type: "video", media_url: null, cover_url: null, caption: "Default cap", hashtags: [], publish_at_iso: null, timezone: "Europe/Rome", requires_manual_publish: false, manual_steps: [] })),
-            warnings: ["OPENAI_API_ERROR: Chiave non valida o limite raggiunto. Caricato Demo Project."]
+            warnings: [`OPENAI_API_ERROR: ${apiError.message || 'Errore Sconosciuto'}. Caricato Demo Project.`]
           });
         }
 
