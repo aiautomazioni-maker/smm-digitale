@@ -12,6 +12,7 @@ export async function POST(req: Request) {
             workspace_id,
             brand_kit,
             user_request,
+          advanced_config = {},
             targets = ["instagram_reels", "tiktok"],
             source,
             preferences,
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
             safeMode = false
         } = body;
 
+      // ... safeMode logic remains ...
         if (safeMode) {
             return NextResponse.json({
                 video_project: {
@@ -46,188 +48,134 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "API Key missing" }, { status: 500 });
         }
 
+      const safeSource = source ? { ...source } : null;
+      if (safeSource && safeSource.media_url && safeSource.media_url.startsWith('data:')) {
+        safeSource.media_url = `[DATA_URL_TRUNCATED]`;
+      }
+
         const prompt = `
-Sei un assistente completo per creare, editare e pubblicare video verticali social (Instagram Reels, Facebook Reels, TikTok).
-Rispondi SEMPRE e SOLO con JSON valido (nessun markdown/backticks, nessun testo fuori dal JSON).
-Non inventare dettagli sul business/prodotto se non presenti negli input.
-Non includere token o segreti.
-Tutti i prompt per generazione/edit video e cover devono essere in inglese.
+You are a senior TikTok/Reels content strategist specialized in high-retention vertical videos.
+Your task is to generate a complete video concept optimized for performance.
 
-INPUT:
-{
-  "lang": "${lang}",
-  "workspace_id": "${workspace_id || ''}",
-  "brand_kit": ${JSON.stringify(brand_kit || null)},
-  "user_request": "${user_request || ''}",
-  "targets": ${JSON.stringify(targets)},
-  "source": ${JSON.stringify(source || { mode: "ai_generate", uploaded_video_url: null, uploaded_media_urls: [], image_analyses: null })},
-  "preferences": ${JSON.stringify(preferences || { default_duration_sec: 15, tone: "engaging", cta_type: "none", cta_value: "", subtitle_mode: "phrase", layout_preset: "minimal", cover_style: "clean", want_music: true, music_mood: "energetic", music_energy: "medium" })},
-  "capabilities": ${JSON.stringify(capabilities || { instagram_reels: { can_publish: true, supports_cover: true }, facebook_reels: { can_publish: true, supports_cover: true }, tiktok: { can_publish: true, supports_cover: true }, supports_platform_music: false, has_safe_music_library: true })},
-  "schedule": ${JSON.stringify(schedule || { timezone: "Europe/Rome", publish_at_iso: null })}
-}
+CLIENT DATA:
+- Industry: ${advanced_config.industry || 'General'}
+- Content Type: ${advanced_config.content_type || 'Educational'}
+- Marketing Goal: ${advanced_config.goal || 'Awareness'}
+- Target Audience: ${advanced_config.target_audience || 'Broad'}
+- Key Topic: ${advanced_config.topic || user_request}
+- Offer: ${advanced_config.offer || 'None'}
+- Lang: ${lang}
 
-OUTPUT JSON:
+Before generating the script, analyze:
+- What emotional trigger works best for this industry?
+- What psychological bias should be used? (curiosity gap, social proof, urgency, authority, relatability)
+- What type of hook statistically performs best for this niche?
+
+Generate a TikTok video concept that is:
+1. Optimized for retention (strong hook in first 3 seconds)
+2. Designed for vertical 9:16 format
+3. Between 20-45 seconds unless strategically longer
+4. Native to TikTok style (not corporate)
+5. Emotion-driven and psychologically engaging
+
+The tone must adapt automatically based on industry. Avoid generic scripts. Make it feel like native viral TikTok content.
+Respect TikTok best practices: Hook in under 2 seconds, pattern interrupt within 5 seconds, short sentences, spoken language, optimize for average watch time.
+
+OUTPUT JSON STRUCTURE:
 {
+  "analysis": {
+    "emotional_trigger": "string",
+    "psychological_bias": "string",
+    "recommended_hook_type": "string",
+    "retention_score": 0.0,
+    "why_it_works": "string"
+  },
   "video_project": {
-    "workspace_id": "string",
     "project_title": "string",
     "goal": "string",
     "concept": "string",
     "style_keywords": ["string"],
-    "platform_targets": ["instagram_reels","facebook_reels","tiktok"],
     "specs": {
       "aspect_ratio": "9:16",
-      "width": 1080,
-      "height": 1920,
-      "fps": 30,
-      "duration_sec": 0,
-      "max_duration_sec": 60,
-      "safe_zone": {"top_px": 250, "bottom_px": 420}
+      "duration_sec": 30
     }
   },
+  "content_variants": {
+    "hooks": ["string", "string", "string"],   // Provide 3 highly optimized hook variations
+    "ctas": ["string", "string"],              // Provide 2 CTA variations optimized for the goal
+    "captions": ["string", "string"]           // Provide 2 TikTok optimized captions (conversational, emojis)
+  },
   "script": {
-    "hook_text": "string",
-    "voiceover_text": "string|null",
-    "on_screen_text": ["string"],
-    "cta_text": "string"
+    "hook_text": "string (chose the best from variants)",
+    "voiceover_text": "Full voiceover script here",
+    "on_screen_text": ["Key text elements floating on screen"],
+    "cta_text": "string (chose the best from variants)"
   },
   "storyboard": {
     "scenes": [
       {
         "scene_index": 1,
-        "duration_sec": 0,
-        "visual_description": "string",
-        "camera_motion": "static|slow_zoom|pan|handheld|parallax",
-        "overlay_text": "string|null",
-        "broll_needed": "ai_generate|from_upload|stock|none"
+        "duration_sec": 5,
+        "visual_description": "What happens visually",
+        "camera_motion": "static|dynamic|zoom",
+        "overlay_text": "string|null"
       }
     ]
   },
-  "generation_plan": {
-    "mode": "text_to_video|image_to_video|video_edit|assemble_clips",
-    "prompt_en": "string|null",
-    "negative_prompt_en": "string|null",
-    "inputs": {"seed_media_urls": ["string"], "use_brand_palette": true},
-    "specs": {"aspect_ratio": "9:16", "width": 1080, "height": 1920, "fps": 30, "duration_sec": 0}
-  },
   "editor_edl": {
-    "timeline": {
-      "duration_sec": 0,
-      "segments": [
-        {"start_sec": 0, "end_sec": 0, "speed": 1.0, "transition_to_next": "cut|fade|whip"}
-      ]
-    },
-    "filters": [{"name": "clean|warm|cool|vibrant|bw", "intensity": 0.0}],
-    "enhancement": {"denoise": 0.0, "sharpen": 0.0, "stabilize": false, "upscale": false},
-    "text_overlays": [
-      {"text": "string", "start_sec": 0, "end_sec": 0, "position_zone": "top|center|bottom", "style": "minimal|modern|bold"}
-    ],
-    "subtitles": {
-      "enabled": true,
-      "mode": "phrase|word",
-      "burn_in": true,
-      "style": "clean",
-      "max_chars_per_line": 28,
-      "position_zone": "center|bottom_safe"
-    },
+    "timeline": { "duration_sec": 30 },
+    "filters": [{"name": "vibrant", "intensity": 0.5}],
     "audio": {
       "music_enabled": true,
-      "music_mode": "safe_library|platform_music_manual|no_music",
-      "music_keywords": ["string"],
-      "ducking": true,
-      "ducking_level": "light|medium|strong",
-      "manual_steps": ["string"]
-    }
+      "music_keywords": ["trending", "lofi", "upbeat"],
+      "ducking": true
+    },
+    "subtitles": { "enabled": true, "mode": "word", "burn_in": true, "style": "dynamic" }
   },
-  "copy": {
-    "caption": "string",
-    "cta": "string",
-    "hashtags": ["string"],
-    "emoji_level": "low|medium|high"
-  },
-  "cover_options": [
-    {
-      "option_index": 1,
-      "title": "string",
-      "hook_text": "string",
-      "prompt_en": "string",
-      "negative_prompt_en": "string",
-      "specs": {"width": 1080, "height": 1920, "aspect_ratio": "9:16"},
-      "thumbnail_safe_crop": {"center_box_pct": 60, "notes": ["string"]},
-      "overlay_plan": [{"text": "string", "position_zone": "center|top", "style": "minimal|modern|bold"}]
-    }
-  ],
   "publish_jobs": [
     {
-      "platform": "instagram_reels|facebook_reels|tiktok",
-      "content_type": "video",
-      "media_url": "string|null",
-      "cover_url": "string|null",
+      "platform": "tiktok",
       "caption": "string",
-      "hashtags": ["string"],
-      "publish_at_iso": "string|null",
-      "timezone": "Europe/Rome",
-      "requires_manual_publish": false,
-      "manual_steps": ["string"]
+      "hashtags": ["#viral", "#niche"]
     }
-  ],
-  "warnings": ["string"]
+  ]
 }
 
-RULES:
-1) Specs:
-- Sempre 9:16, 1080x1920, 30fps.
-- duration_sec: usa preferences.default_duration_sec se valido (7..30 consigliato), altrimenti 15.
-- max_duration_sec=60.
-- safe_zone bottom_px=420 (evita UI TikTok/IG).
-
-2) Script:
-- hook_text max 60 caratteri.
-- voiceover_text opzionale (se user_request suggerisce voce).
-- on_screen_text max 6 elementi, frasi brevi.
-
-3) Storyboard:
-- 3-6 scene.
-- Somma durata scene = duration_sec (±1s).
-
-4) Generation plan:
-- source.mode=ai_generate -> mode=text_to_video e prompt_en obbligatorio.
-- source.mode=edit_upload -> mode=video_edit con seed_media_urls=[uploaded_video_url].
-- source.mode=mixed -> mode=assemble_clips con seed_media_urls=uploaded_media_urls.
-- prompt_en sempre in inglese, max 900 char. negative max 350 char.
-
-5) Editor EDL defaults:
-- filters: "clean" intensity 0.25
-- enhancement: denoise 0.2, sharpen 0.15
-- subtitles.enabled=true
-- subtitles.position_zone: "center" se target include tiktok, altrimenti "bottom_safe".
-- audio:
-  - se preferences.want_music=false -> music_mode=no_music
-  - se has_safe_music_library=true -> safe_library con 5-10 keyword
-  - se non disponibile e supports_platform_music=true -> platform_music_manual + manual steps
-  - se voiceover_text presente -> ducking_level almeno "medium"
-
-6) Copy:
-- hashtags max 18 con # e senza spazi.
-- Caption coerente con concept e CTA.
-
-7) Cover:
-- 4 cover_options sempre.
-- hook_text cover max 45 char.
-- thumbnail_safe_crop.center_box_pct=60 e note su testo nel centro.
-
-8) Publish jobs:
-- Crea un job per ogni platform in targets.
-- Se capabilities.platform.can_publish=false -> requires_manual_publish=true + manual_steps.
-- Se supports_cover=false -> cover_url=null + warning "cover_not_supported" + manual_steps "Imposta copertina manualmente".
-- media_url inizialmente null (finché non hai render finale). NON inventare URL: se non disponibile, null + warning "video_pending_render".
+Respond ONLY with valid JSON. No markdown backticks. All text in ${lang}.
 `;
 
+
         // Switch to the larger model for a task this complex
-        const result = await openai.chat.completions.create({
-            model: 'gpt-4o', // using standard 4o to ensure perfect schema adherence on massive json
-            messages: [{ role: 'user', content: prompt }]
+      let result;
+      try {
+        result = await openai.chat.completions.create({
+          model: 'gpt-4o', // using standard 4o to ensure perfect schema adherence on massive json
+          messages: [{ role: 'user', content: prompt }]
         });
+        } catch (apiError: any) {
+          console.error("OpenAI API Failure, falling back to Demo Project:", apiError);
+
+          // Return the same mock project as safeMode but with a dynamic warning
+          return NextResponse.json({
+            video_project: {
+              workspace_id: workspace_id || "demo_ws",
+              project_title: "Demo Project (AI Fallback)",
+              goal: "Visual demonstration",
+              concept: "Il sistema ha caricato un progetto demo perché l'AI è momentaneamente non disponibile.",
+              style_keywords: ["demo", "fallback"],
+              platform_targets: targets,
+              specs: { aspect_ratio: "9:16", width: 1080, height: 1920, fps: 30, duration_sec: 15, max_duration_sec: 60, safe_zone: { top_px: 250, bottom_px: 420 } }
+            },
+            script: { hook_text: "Benvenuto nel Video Studio", voiceover_text: "Questo è un progetto demo caricato in modalità fallback.", on_screen_text: ["Demo Mode"], cta_text: "Inizia a creare" },
+            storyboard: { scenes: [{ scene_index: 1, duration_sec: 15, visual_description: "Interfaccia demo attiva", camera_motion: "static", overlay_text: "Demo", broll_needed: "none" }] },
+            generation_plan: { mode: "text_to_video", prompt_en: "demo video", negative_prompt_en: "", inputs: { seed_media_urls: [], use_brand_palette: true }, specs: { aspect_ratio: "9:16", width: 1080, height: 1920, fps: 30, duration_sec: 15 } },
+            editor_edl: { timeline: { duration_sec: 15, segments: [{ start_sec: 0, end_sec: 15, speed: 1.0, transition_to_next: "cut" }] }, filters: [{ name: "clean", intensity: 0.25 }], enhancement: { denoise: 0.2, sharpen: 0.15, stabilize: false, upscale: false }, text_overlays: [], subtitles: { enabled: true, mode: "phrase", burn_in: true, style: "clean", max_chars_per_line: 28, position_zone: "center" }, audio: { music_enabled: true, music_mode: "safe_library", music_keywords: ["upbeat"], ducking: true, ducking_level: "medium", manual_steps: [] } },
+            copy: { caption: "Progetto Demo", cta: "Link in bio", hashtags: ["#demo"], emoji_level: "medium" },
+            cover_options: [{ option_index: 1, title: "Cover Demo", hook_text: "Demo Hook", prompt_en: "cover prompt", negative_prompt_en: "", specs: { width: 1080, height: 1920, aspect_ratio: "9:16" }, thumbnail_safe_crop: { center_box_pct: 60, notes: ["Keep center"] }, overlay_plan: [] }],
+            publish_jobs: targets.map((t: string) => ({ platform: t, content_type: "video", media_url: null, cover_url: null, caption: "Default cap", hashtags: [], publish_at_iso: null, timezone: "Europe/Rome", requires_manual_publish: false, manual_steps: [] })),
+            warnings: ["OPENAI_API_ERROR: Chiave non valida o limite raggiunto. Caricato Demo Project."]
+          });
+        }
 
         const responseText = result.choices[0]?.message?.content || "{}";
         const rawJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();

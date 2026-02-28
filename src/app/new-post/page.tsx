@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,7 +62,7 @@ const MOCK_BRAND_KIT: BrandKit = {
     brand_hashtags: ["#smmdigitale", "#marketingai", "#growth"]
 };
 
-export default function NewPostWizard() {
+function NewPostWizardInner() {
     const { t } = useTranslation();
     const searchParams = useSearchParams();
 
@@ -882,5 +882,13 @@ export default function NewPostWizard() {
                 onSave={(newImg) => setGeneratedContent({ ...generatedContent, selectedImage: newImg })}
             />
         </div>
+    );
+}
+
+export default function NewPostWizard() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>}>
+            <NewPostWizardInner />
+        </Suspense>
     );
 }

@@ -100,10 +100,37 @@ RULES:
 - Non inventare dettagli sul brand/prodotto se non presenti in input.
 `;
 
-        const result = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }]
-        });
+        let result;
+        try {
+            result = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: prompt }]
+            });
+        } catch (apiError: any) {
+            console.error("OpenAI API Failure in CreateVideoProject, falling back to mock:", apiError);
+            return NextResponse.json({
+                route: source.mode,
+                video_project: {
+                    workspace_id: workspace_id,
+                    project_title: "Demo Project (Fallback)",
+                    goal: "Visual demonstration",
+                    concept: "Il sistema ha caricato un progetto demo perché l'AI è momentaneamente non disponibile.",
+                    style_keywords: ["dynamic", "bright", "modern"],
+                    platform_targets: platforms,
+                    specs: {
+                        aspect_ratio: "9:16",
+                        width: 1080,
+                        height: 1920,
+                        fps: 30,
+                        duration_sec: 15,
+                        max_duration_sec: 60,
+                        safe_zone: { top_px: 250, bottom_px: 420 }
+                    }
+                },
+                missing_info: ["Target audience?", "Specific call to action?"],
+                warnings: ["OPENAI_API_ERROR: Chiave non valida o limite raggiunto. Caricato il progetto di test."]
+            });
+        }
 
         const responseText = result.choices[0]?.message?.content || "{}";
 

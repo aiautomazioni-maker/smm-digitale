@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "@/context/LanguageContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Share2, Wand2, Bell, Save, CheckCircle2, Globe, Link as LinkIcon, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-export default function SettingsPage() {
+function SettingsPageInner() {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
 
@@ -241,5 +241,13 @@ export default function SettingsPage() {
                 </TabsContent>
             </Tabs>
         </div>
+    );
+}
+
+export default function SettingsPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>}>
+            <SettingsPageInner />
+        </Suspense>
     );
 }

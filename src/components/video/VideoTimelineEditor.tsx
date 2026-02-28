@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Scissors, Type, Wand2, Music, Save, Play, Image as ImageIcon } from 'lucide-react';
+import { Scissors, Type, Wand2, Music, Save, Play, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { MusicSelector, Track } from '@/components/MusicSelector';
+import { toast } from 'sonner';
 
 export default function VideoTimelineEditor() {
     const { projectManifest, fullPlan, applyPartialEdit } = useVideoStore();
@@ -20,6 +22,7 @@ export default function VideoTimelineEditor() {
 
     const [editPrompt, setEditPrompt] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
 
     useEffect(() => {
         if (fullPlan?.editor_edl) {
@@ -79,6 +82,54 @@ export default function VideoTimelineEditor() {
         }
     };
 
+    const handleTikTokPublish = async () => {
+        if (!fullPlan) return;
+        setIsPublishing(true);
+        try {
+            const res = await fetch('/api/agent/publish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    platform: 'tiktok',
+                    workspace_id: fullPlan.video_project.workspace_id,
+                    lang: 'it',
+                    post: {
+                        content_type: 'reel',
+                        caption: fullPlan.copy?.caption || "",
+                        hashtags: fullPlan.copy?.hashtags || [],
+                        media_urls: [fullPlan.publish_jobs?.[0]?.media_url || 'https://example.com/demo.mp4'], // Fallback for demo
+                        audio_url: fullPlan.editor_edl?.audio?.url
+                    }
+                })
+            });
+            const data = await res.json();
+            if (data.success || data.simulated) {
+                toast.success(`Post pubblicato su TikTok! ${data.simulated ? '(SIMULATO)' : ''}`);
+            } else {
+                toast.error(`Errore: ${data.error}`);
+            }
+        } catch (e) {
+            toast.error("Errore di connessione durante la pubblicazione.");
+        } finally {
+            setIsPublishing(false);
+        }
+    };
+
+    const handleMusicSelect = (track: Track | null) => {
+        if (!fullPlan) return;
+        applyPartialEdit({
+            updated_editor_edl: {
+                ...fullPlan.editor_edl,
+                audio: {
+                    ...fullPlan.editor_edl?.audio,
+                    music_enabled: !!track,
+                    music_mode: track ? 'safe_library' : 'no_music',
+                    url: track?.previewUrl
+                }
+            }
+        });
+    };
+
     if (!projectManifest) {
         return (
             <div className="bg-white/5 border border-white/10 p-6 rounded-xl flex items-center justify-center min-h-[500px]">
@@ -90,15 +141,21 @@ export default function VideoTimelineEditor() {
     }
 
     return (
-        <div className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col min-h-[600px] animate-in slide-in-from-right-8 duration-500">
+        <div id="video-editor" className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col min-h-[600px] animate-in slide-in-from-right-8 duration-500">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                     <Scissors className="w-5 h-5 text-purple-400" />
                     Timeline Editor
                 </h3>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <Save className="w-4 h-4 mr-2" /> Save EDL
-                </Button>
+                <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="border-white/10 text-white hover:bg-white/5" onClick={handleTikTokPublish} disabled={isPublishing}>
+                        {isPublishing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Music className="w-4 h-4 mr-2" />}
+                        Pubblica su TikTok
+                    </Button>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Save className="w-4 h-4 mr-2" /> Save EDL
+                    </Button>
+                </div>
             </div>
 
             <div className="flex flex-1 gap-6">
@@ -124,17 +181,18 @@ export default function VideoTimelineEditor() {
                         </div>
                     </div>
                 </div>
-
                 {/* CONTROLS */}
                 <div className="w-1/2 flex flex-col">
                     <Tabs defaultValue="ai_edit" className="w-full">
-                        <TabsList className="grid w-full grid-cols-5 bg-black/40 p-1 rounded-lg mb-4 text-xs">
-                            <TabsTrigger value="ai_edit" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><Wand2 className="w-3 h-3 mr-1" /> AI Edit</TabsTrigger>
-                            <TabsTrigger value="trim" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><Scissors className="w-3 h-3 mr-1" /> Trim</TabsTrigger>
-                            <TabsTrigger value="filters" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><Wand2 className="w-3 h-3 mr-1" /> Filters</TabsTrigger>
-                            <TabsTrigger value="text" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><Type className="w-3 h-3 mr-1" /> Text</TabsTrigger>
-                            <TabsTrigger value="audio" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50"><Music className="w-3 h-3 mr-1" /> Audio</TabsTrigger>
-                        </TabsList>
+                        <div className="w-full overflow-x-auto pb-2 -mb-2 custom-scrollbar">
+                            <TabsList className="inline-flex min-w-max h-auto bg-black/40 p-1 rounded-lg mb-4 text-xs gap-1">
+                                <TabsTrigger value="ai_edit" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50 px-3 py-2"><Wand2 className="w-3 h-3 mr-1" />AI Edit</TabsTrigger>
+                                <TabsTrigger value="trim" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50 px-3 py-2"><Scissors className="w-3 h-3 mr-1" />Trim</TabsTrigger>
+                                <TabsTrigger value="filters" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50 px-3 py-2"><Wand2 className="w-3 h-3 mr-1" />Filters</TabsTrigger>
+                                <TabsTrigger value="text" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50 px-3 py-2"><Type className="w-3 h-3 mr-1" />Text</TabsTrigger>
+                                <TabsTrigger value="audio" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/50 px-3 py-2"><Music className="w-3 h-3 mr-1" />Audio</TabsTrigger>
+                            </TabsList>
+                        </div>
 
                         <div className="flex-1 bg-black/30 rounded-lg border border-white/10 p-4">
                             <TabsContent value="ai_edit" className="space-y-4 mt-0">
@@ -209,8 +267,10 @@ export default function VideoTimelineEditor() {
                             </TabsContent>
 
                             <TabsContent value="audio" className="space-y-4 mt-0">
-                                <label className="text-sm font-medium text-white/80 block">Audio Settings</label>
-                                <p className="text-xs text-white/50">Audio mixing and AI Voiceovers will be configured here.</p>
+                                <MusicSelector
+                                    onSelect={handleMusicSelect}
+                                    selectedTrackId={fullPlan?.editor_edl?.audio?.url}
+                                />
                             </TabsContent>
                         </div>
                     </Tabs>
