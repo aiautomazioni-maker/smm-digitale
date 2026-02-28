@@ -36,46 +36,48 @@ export default function VideoProjectInitiator() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validate it's a video
         if (!file.type.startsWith('video/')) {
             toast.error('Carica solo file video (mp4, mov, etc.)');
             return;
         }
 
-        // Validate file size (50MB Supabase free tier limit)
         const MAX_SIZE_MB = 50;
         if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-            toast.error(`Il video supera i ${MAX_SIZE_MB}MB. Per ora usa un video più corto o comprimi il file.`);
+            toast.error(`Il video supera i ${MAX_SIZE_MB}MB. Usa un video più corto o comprimi il file.`);
             return;
         }
+
         setIsUploading(true);
         setUploadedFileName(file.name);
+
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `video_${Date.now()}.${fileExt}`;
+            // Upload through server-side API (uses service_role key, bypasses RLS)
+            const formData = new FormData();
+            formData.append('file', file);
 
-            const { error: uploadError } = await supabase.storage
-                .from('video-uploads')
-                .upload(fileName, file, { upsert: true });
+            const res = await fetch('/api/storage/upload-video', {
+                method: 'POST',
+                body: formData,
+            });
 
-            if (uploadError) {
-                console.error("Supabase upload error:", uploadError);
-                // Fallback: create a local blob URL (won't be accessible by the AI, but won't crash the prompt)
+            const data = await res.json();
+
+            if (!res.ok || data.error) {
+                console.error("Server upload error:", data.error);
+            // Fallback to local blob URL
                 const blobUrl = URL.createObjectURL(file);
                 setUploadedVideoUrl(blobUrl);
                 toast.warning('Upload cloud fallito. Video caricato localmente. Alcune funzionalità AI potrebbero essere limitate.');
                 return;
             }
 
-            const { data: urlData } = supabase.storage
-                .from('video-uploads')
-                .getPublicUrl(fileName);
-
-            setUploadedVideoUrl(urlData.publicUrl);
+            setUploadedVideoUrl(data.url);
             toast.success('Video caricato su cloud con successo!');
         } catch (err) {
             console.error("Upload error:", err);
-            toast.error('Errore durante il caricamento del video.');
+            const blobUrl = URL.createObjectURL(file);
+            setUploadedVideoUrl(blobUrl);
+            toast.warning('Upload cloud fallito. Video caricato localmente.');
         } finally {
             setIsUploading(false);
         }
