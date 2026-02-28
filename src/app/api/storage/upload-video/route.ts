@@ -3,56 +3,45 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
     try {
-        const formData = await req.formData();
-        const file = formData.get('file') as File;
+        const { fileName, contentType } = await req.json();
 
-        if (!file) {
-            return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+        if (!fileName) {
+            return NextResponse.json({ error: 'No fileName provided' }, { status: 400 });
         }
 
-        // Validate type
-        if (!file.type.startsWith('video/')) {
-            return NextResponse.json({ error: 'Solo file video sono permessi' }, { status: 400 });
-        }
-
-        // Validate size (50MB)
-        const MAX_SIZE = 50 * 1024 * 1024;
-        if (file.size > MAX_SIZE) {
-            return NextResponse.json({ error: 'File troppo grande (max 50MB)' }, { status: 400 });
-        }
-
-        // Use service_role key to bypass RLS - this runs server-side only
         const supabaseAdmin = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
-        const fileExt = file.name.split('.').pop() || 'mp4';
-        const fileName = `video_${Date.now()}.${fileExt}`;
+        // Sanitize logic
+        const fileExt = fileName.split('.').pop() || 'mp4';
+        const safeName = `video_${Date.now()}.${fileExt}`;
 
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const { error: uploadError } = await supabaseAdmin.storage
+        // Create a signed upload URL valid for 10 minutes, bypassing RLS using the admin key
+        const { data, error: signError } = await supabaseAdmin.storage
             .from('video-uploads')
-            .upload(fileName, buffer, {
-                contentType: file.type,
-                upsert: true
-            });
+            .createSignedUploadUrl(safeName);
 
-        if (uploadError) {
-            console.error('[UPLOAD] Supabase error:', uploadError);
-            return NextResponse.json({ error: uploadError.message }, { status: 500 });
+        if (signError || !data) {
+            console.error('[UPLOAD_URL] Supabase sign error:', signError);
+            return NextResponse.json({ error: signError?.message || 'Failed to generate upload URL' }, { status: 500 });
         }
 
         const { data: { publicUrl } } = supabaseAdmin.storage
             .from('video-uploads')
-            .getPublicUrl(fileName);
+            .getPublicUrl(safeName);
 
-        return NextResponse.json({ success: true, url: publicUrl, fileName });
+        return NextResponse.json({
+            success: true,
+            signedUrl: data.signedUrl,
+            token: data.token,
+            path: data.path,
+            publicUrl: publicUrl
+        });
 
     } catch (err: any) {
-        console.error('[UPLOAD] Exception:', err);
-        return NextResponse.json({ error: err.message || 'Upload failed' }, { status: 500 });
+        console.error('[UPLOAD_URL] Exception:', err);
+        return NextResponse.json({ error: err.message || 'Signature failed' }, { status: 500 });
     }
 }

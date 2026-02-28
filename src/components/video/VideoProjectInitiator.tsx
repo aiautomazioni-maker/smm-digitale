@@ -51,27 +51,34 @@ export default function VideoProjectInitiator() {
         setUploadedFileName(file.name);
 
         try {
-            // Upload through server-side API (uses service_role key, bypasses RLS)
-            const formData = new FormData();
-            formData.append('file', file);
-
+            // STEP 1: Get Signed Upload URL from our server (bypasses RLS securely)
             const res = await fetch('/api/storage/upload-video', {
                 method: 'POST',
-                body: formData,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fileName: file.name,
+                    contentType: file.type
+                }),
             });
 
             const data = await res.json();
 
-            if (!res.ok || data.error) {
-                console.error("Server upload error:", data.error);
-            // Fallback to local blob URL
-                const blobUrl = URL.createObjectURL(file);
-                setUploadedVideoUrl(blobUrl);
-                toast.warning('Upload cloud fallito. Video caricato localmente. Alcune funzionalità AI potrebbero essere limitate.');
-                return;
+            if (!res.ok || data.error || !data.signedUrl) {
+                console.error("Server signature error:", data.error);
+                throw new Error("Impossibile generare URL di upload");
             }
 
-            setUploadedVideoUrl(data.url);
+            // STEP 2: Upload directly to Supabase using the signed URL/token
+            const { error: uploadError } = await supabase.storage
+                .from('video-uploads')
+                .uploadToSignedUrl(data.path, data.token, file);
+
+            if (uploadError) {
+                console.error("Direct upload to Supabase failed:", uploadError);
+                throw new Error("Caricamento diretto fallito");
+            }
+
+            setUploadedVideoUrl(data.publicUrl);
             toast.success('Video caricato su cloud con successo!');
         } catch (err) {
             console.error("Upload error:", err);
