@@ -18,9 +18,9 @@ export async function GET(req: Request) {
     // user.info.basic: Basic profile info
     // video.upload: Required for Video Kit
     // video.publish: Required for Direct Post
-    // user.stats.read: Required for Analytics
+    // user.info.stats: Required for Analytics (Followers, Likes)
     // video.list: Required for Video Analytics
-    const scope = 'user.info.basic,video.upload,video.publish,user.stats.read,video.list';
+    const scope = 'user.info.basic,video.upload,video.publish,user.info.stats,video.list';
 
     // CSRF Protection
     const state = Math.random().toString(36).substring(7);
