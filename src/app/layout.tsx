@@ -7,8 +7,8 @@ import { MobileNav } from "@/components/MobileNav";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 export const metadata: Metadata = {
-  title: "SMM Digitale - AI Social Manager",
-  description: "La tua suite completa per la gestione social con AI",
+  title: "Automazioni AI - AI Social Manager",
+  description: "La tua suite completa per l'automazione social con Intelligenza Artificiale",
 };
 
 export default function RootLayout({

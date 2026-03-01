@@ -47,10 +47,10 @@ export function Sidebar() {
         <div className="hidden lg:flex w-64 border-r border-white/10 bg-black/20 backdrop-blur-xl h-full flex-col p-4">
             <div className="flex items-center space-x-3 px-2 py-6 mb-6">
                 <div className="w-10 h-10 bg-instagram-gradient rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/20 shrink-0">
-                    <span className="text-white font-bold text-lg">SM</span>
+                    <span className="text-white font-bold text-lg">AA</span>
                 </div>
                 <div>
-                    <span className="font-bold text-lg block tracking-tight">SMM Digitale</span>
+                    <span className="font-bold text-lg block tracking-tight">Automazioni AI</span>
                     <span className="text-xs text-muted-foreground font-medium">Crediti: <span className="text-primary font-bold">{credits !== null ? credits : '...'}</span></span>
                 </div>
             </div>
