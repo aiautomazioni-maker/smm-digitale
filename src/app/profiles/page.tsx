@@ -45,9 +45,9 @@ const PROFILES = [
             engagement: "5.2%"
         },
         posts: [
-            { id: 1, image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e", likes: 450, comments: 24, commentList: [{ user: "tech_guru", text: "L'automazione CRM è pazzesca!", time: "2h" }, { user: "digital_agency", text: "Ottimo lavoro con questo bot 🚀", time: "5h" }] },
-            { id: 2, image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5", likes: 320, comments: 15, commentList: [{ user: "startup_ltd", text: "Quanto tempo fa risparmiare?", time: "1g" }] },
-            { id: 3, image: "https://images.unsplash.com/photo-1518770660439-4636190af475", likes: 510, comments: 42, commentList: [{ user: "marco_dev", text: "Integrazione API pulitissima", time: "2g" }] },
+            { id: 1, image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e", likes: 450, comments: 24, commentList: [{ user: "ai_enthusiast", text: "Questa automazione è geniale!", time: "2h" }, { user: "business_pro", text: "Ottimo workflow 🚀", time: "5h" }] },
+            { id: 2, image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5", likes: 320, comments: 15, commentList: [{ user: "growth_hacker", text: "Software rivoluzionario 💎", time: "1g" }] },
+            { id: 3, image: "https://images.unsplash.com/photo-1518770660439-4636190af475", likes: 510, comments: 42, commentList: [{ user: "dev_master", text: "Integrazione perfetta", time: "2g" }] },
             { id: 4, image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b", likes: 215, comments: 18, commentList: [] },
             { id: 5, image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1", likes: 180, comments: 8, commentList: [] },
             { id: 6, image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa", likes: 640, comments: 75, commentList: [] },

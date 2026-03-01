@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             return NextResponse.json({
                 generation_plan: {
                     mode: "text_to_video",
-                    prompt_en: "vertical 9:16, high quality, cinematic lighting, sharp focus, dynamic shot of artisanal ceramic mugs on a rustic wooden table",
+                prompt_en: "vertical 9:16, high quality, cinematic lighting, sharp focus, futuristic tech office with holographic screens showing data analytics",
                     negative_prompt_en: "blurry, low quality, distorted, watermark",
                     inputs: { seed_media_urls: source?.uploaded_media_urls || [], use_brand_palette: true },
                     specs: { aspect_ratio: "9:16", width: 1080, height: 1920, fps: 30, duration_sec: 15 },

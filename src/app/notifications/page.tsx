@@ -9,17 +9,17 @@ import Link from "next/link";
 
 // Dati mockati
 const socialNotifications = [
-    { id: 1, type: "social", subType: "like", icon: Heart, color: "text-red-500", title: "Caffè Artisan", desc: "A Marco Rossi e altri 45 piace il tuo ultimo Reel.", time: "10m fa", unread: true },
-    { id: 2, type: "social", subType: "comment", icon: MessageCircle, color: "text-blue-500", title: "Nuovo Commento", desc: "Giulia Bianchi ha commentato: 'Bellissimo locale, verrò sicuramente a trovarvi!'", time: "2h fa", unread: true },
-    { id: 3, type: "social", subType: "repost", icon: Repeat, color: "text-green-500", title: "Condivisione", desc: "La tua Storia è stata condivisa da @milano.foodie", time: "5h fa", unread: false },
-    { id: 4, type: "social", subType: "dm", icon: Share2, color: "text-purple-500", title: "Messaggio Diretto", desc: "Hai ricevuto un nuovo messaggio da Luca Verdi.", time: "1g fa", unread: false },
+    { id: 1, type: "social", subType: "like", icon: Heart, color: "text-red-500", title: "Automazioni AI", desc: "A Marco Rossi e altri 45 piace il tuo nuovo video tutorial sull'AI.", time: "10m fa", unread: true },
+    { id: 2, type: "social", subType: "comment", icon: MessageCircle, color: "text-blue-500", title: "Nuovo Commento", desc: "Giulia Bianchi ha commentato: 'Software incredibile, mi ha dimezzato i tempi di editing!'", time: "2h fa", unread: true },
+    { id: 3, type: "social", subType: "repost", icon: Repeat, color: "text-green-500", title: "Condivisione", desc: "Il tuo ultimo carosello è stato condiviso da @ai.business.growth", time: "5h fa", unread: false },
+    { id: 4, type: "social", subType: "dm", icon: Share2, color: "text-purple-500", title: "Messaggio Diretto", desc: "Hai ricevuto una richiesta di consulenza da Luca Verdi.", time: "1g fa", unread: false },
 ];
 
 const systemNotifications = [
     { id: 1, type: "system", icon: AlertTriangle, color: "text-amber-500", title: "Crediti in esaurimento", desc: "Attenzione: hai consumato l'80% dei tuoi crediti AI mensili. Considera di fare un upgrade al piano superiore per non interrompere la generazione automatica dei post.", time: "1h fa", unread: true },
     { id: 2, type: "system", icon: CheckCircle2, color: "text-emerald-500", title: "Pagamento Ricevuto", desc: "Il tuo rinnovo mensile al piano Professional è andato a buon fine. Ricevuta inviata per email.", time: "2g fa", unread: false },
     { id: 3, type: "system", icon: Info, color: "text-blue-500", title: "Aggiornamento Piattaforma v2.4", desc: "Abbiamo introdotto nuove funzionalità nel Brand Kit AI e migliorato la generazione delle Caption. Entra subito per provarle!", time: "5g fa", unread: false },
-    { id: 4, type: "system", icon: ShieldAlert, color: "text-red-500", title: "Disconnessione Token Facebook", desc: "Il token di accesso alla pagina Facebook 'Caffè Artisan' è scaduto. Vai nelle impostazioni per ricollegarlo e riprendere la pubblicazione.", time: "1 sett fa", unread: false },
+    { id: 4, type: "system", icon: ShieldAlert, color: "text-red-500", title: "Token TikTok Scaduto", desc: "Il token di accesso al profilo 'Automazioni AI' è scaduto. Ricollegalo per continuare a pubblicare via AI.", time: "1 sett fa", unread: false },
 ];
 
 export default function NotificationsPage() {
