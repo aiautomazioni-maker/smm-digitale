@@ -451,7 +451,7 @@ export async function POST(req: Request) {
                     body: JSON.stringify({
                         post_info: {
                             title: payload.caption_final.substring(0, 150),
-                            privacy_level: "MUTUAL_FOLLOW", // Must not be PUBLIC for unaudited Sandbox apps
+                            privacy_level: "MUTUAL_FOLLOW_FRIENDS", // Must not be PUBLIC for unaudited Sandbox apps
                             disable_duet: false,
                             disable_comment: false,
                             disable_stitch: false,
