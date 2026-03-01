@@ -15,11 +15,12 @@ export async function GET(req: Request) {
     // TikTok OAuth 2.0 endpoint
     const baseUrl = 'https://www.tiktok.com/v2/auth/authorize/';
 
-    // Scopes needed for our application:
     // user.info.basic: Basic profile info
     // video.upload: Required for Video Kit
     // video.publish: Required for Direct Post
-    const scope = 'user.info.basic,video.upload,video.publish';
+    // user.stats.read: Required for Analytics
+    // video.list: Required for Video Analytics
+    const scope = 'user.info.basic,video.upload,video.publish,user.stats.read,video.list';
 
     // CSRF Protection
     const state = Math.random().toString(36).substring(7);

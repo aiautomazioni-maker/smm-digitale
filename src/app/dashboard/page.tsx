@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useTranslation } from "@/context/LanguageContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Heart, Share2, MoreHorizontal, MessageSquare, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { EngagementChart } from "@/components/dashboard/EngagementChart";
 
 // Mock Data
 const RECENT_COMMENTS = [
@@ -23,9 +25,28 @@ const RECENT_MESSAGES = [
 
 export default function DashboardPage() {
     const { t } = useTranslation();
+    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchAnalytics() {
+            try {
+                const res = await fetch('/api/tiktok/analytics');
+                if (res.ok) {
+                    const data = await res.json();
+                    setTiktokData(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch TikTok analytics", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchAnalytics();
+    }, []);
 
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-8 pb-10 text-white">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
@@ -45,8 +66,12 @@ export default function DashboardPage() {
                         <Heart className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">42.8K</div>
-                        <p className="text-xs text-muted-foreground">+8.1% dal mese scorso</p>
+                        <div className="text-2xl font-bold">
+                            {isLoading ? "..." : (tiktokData?.followers ? `${(tiktokData.followers / 1000).toFixed(1)}K` : "42.8K")}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            {tiktokData?.followers ? "Dati reali TikTok" : "+8.1% dal mese scorso"}
+                        </p>
                     </CardContent>
                 </Card>
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
@@ -55,8 +80,12 @@ export default function DashboardPage() {
                         <Share2 className="h-4 w-4 text-pink-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">128.4K</div>
-                        <p className="text-xs text-muted-foreground">+45% (Effetto virale 🚀)</p>
+                        <div className="text-2xl font-bold">
+                            {isLoading ? "..." : (tiktokData?.views ? `${(tiktokData.views / 1000).toFixed(1)}K` : "128.4K")}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            {tiktokData?.views ? "Ultimi 10 video" : "+45% (Effetto virale 🚀)"}
+                        </p>
                     </CardContent>
                 </Card>
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
@@ -79,6 +108,11 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground">Bot e workflow in esecuzione</p>
                     </CardContent>
                 </Card>
+            </div>
+
+            {/* Engagement Overview (Moved here for visibility) */}
+            <div className="grid gap-6">
+                <EngagementChart />
             </div>
 
             {/* WIDGETS GRIDS */}
