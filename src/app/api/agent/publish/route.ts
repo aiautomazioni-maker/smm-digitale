@@ -452,10 +452,6 @@ export async function POST(req: Request) {
                         post_info: {
                             title: payload.caption_final.substring(0, 150),
                             privacy_level: "MUTUAL_FOLLOW_FRIENDS", // Must not be PUBLIC for unaudited Sandbox apps
-                            disable_duet: false,
-                            disable_comment: false,
-                            disable_stitch: false,
-                            video_cover_timestamp_ms: 1000
                         },
                         source_info: {
                             source: "FILE_UPLOAD",
