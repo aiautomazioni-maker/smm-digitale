@@ -486,9 +486,9 @@ export async function POST(req: Request) {
 
                 if (initData.error || !initData.data?.upload_url) {
                     const errMsg = initData.error?.message || initData.data?.error?.message || "TikTok Init failed";
-                    console.error("TikTok Init Error:", errMsg);
+                    console.error("TikTok Init Error:", initData);
                     // Provide detailed debug for user
-                    return NextResponse.json({ error: errMsg, debug_creator_info: creatorData }, { status: 400 });
+                    return NextResponse.json({ error: errMsg, debug_creator_info: creatorData, raw_init_response: initData }, { status: 400 });
                 }
 
                 const uploadUrl = initData.data.upload_url;

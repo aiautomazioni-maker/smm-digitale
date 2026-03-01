@@ -119,7 +119,9 @@ export default function VideoTimelineEditor() {
                 toast.success(`Post pubblicato su TikTok! ${data.simulated ? '(SIMULATO)' : ''}`);
             } else {
                 let errStr = data.error;
-                if (data.debug_creator_info && data.debug_creator_info.error?.message) {
+                if (data.raw_init_response) {
+                    errStr += ` | Raw API Error: ${JSON.stringify(data.raw_init_response)}`;
+                } else if (data.debug_creator_info && data.debug_creator_info.error?.message) {
                     errStr += ` | Debug Info: ${data.debug_creator_info.error.message}`;
                 } else if (data.debug_creator_info) {
                     errStr += ` | Debug: ${JSON.stringify(data.debug_creator_info.data?.privacy_level_options || "No privacy options")}`;
