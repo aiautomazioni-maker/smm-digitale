@@ -118,7 +118,13 @@ export default function VideoTimelineEditor() {
             if (data.success || data.simulated) {
                 toast.success(`Post pubblicato su TikTok! ${data.simulated ? '(SIMULATO)' : ''}`);
             } else {
-                toast.error(`Errore: ${data.error}`);
+                let errStr = data.error;
+                if (data.debug_creator_info && data.debug_creator_info.error?.message) {
+                    errStr += ` | Debug Info: ${data.debug_creator_info.error.message}`;
+                } else if (data.debug_creator_info) {
+                    errStr += ` | Debug: ${JSON.stringify(data.debug_creator_info.data?.privacy_level_options || "No privacy options")}`;
+                }
+                toast.error(`Errore: ${errStr}`);
             }
         } catch (e) {
             toast.error("Errore di connessione durante la pubblicazione.");
