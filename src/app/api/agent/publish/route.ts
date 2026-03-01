@@ -440,6 +440,23 @@ export async function POST(req: Request) {
                 const videoSize = videoBuffer.length;
                 console.log(`[TIKTOK] Video size: ${videoSize} bytes`);
 
+                // Pre-Step 2: Query creator info to see what privacy_level is actually allowed for this user/app!
+                console.log("[TIKTOK] Querying creator_info for allowed privacy options...");
+                const creatorRes = await fetch('https://open.tiktokapis.com/v2/post/publish/creator_info/query/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TIKTOK_ACCESS_TOKEN}`,
+                        'Content-Type': 'application/json; charset=UTF-8'
+                    }
+                });
+                const creatorData = await creatorRes.json();
+                console.log("[TIKTOK] Creator Info:", JSON.stringify(creatorData));
+
+                let allowedPrivacy = "SELF_ONLY";
+                if (creatorData.data?.privacy_level_options?.length > 0) {
+                    allowedPrivacy = creatorData.data.privacy_level_options[0]; // pick the most restrictive or whatever is first
+                }
+
                 // Step 2: Init the upload with FILE_UPLOAD (no domain verification needed)
                 const CHUNK_SIZE = videoSize; // single chunk for simplicity
                 const initRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
@@ -450,8 +467,11 @@ export async function POST(req: Request) {
                     },
                     body: JSON.stringify({
                         post_info: {
-                            title: payload.caption_final.substring(0, 150),
-                            privacy_level: "SELF_ONLY", // ONLY "SELF_ONLY" is allowed for unaudited Sandbox apps
+                            title: payload.caption_final ? payload.caption_final.substring(0, 150) : "Video from SMM Digitale",
+                            privacy_level: allowedPrivacy,
+                            disable_duet: false,
+                            disable_comment: false,
+                            disable_stitch: false,
                         },
                         source_info: {
                             source: "FILE_UPLOAD",
@@ -468,7 +488,8 @@ export async function POST(req: Request) {
                 if (initData.error || !initData.data?.upload_url) {
                     const errMsg = initData.error?.message || initData.data?.error?.message || "TikTok Init failed";
                     console.error("TikTok Init Error:", errMsg);
-                    return NextResponse.json({ error: errMsg }, { status: 400 });
+                    // Provide detailed debug for user
+                    return NextResponse.json({ error: errMsg, debug_creator_info: creatorData }, { status: 400 });
                 }
 
                 const uploadUrl = initData.data.upload_url;
