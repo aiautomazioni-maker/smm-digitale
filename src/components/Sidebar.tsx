@@ -147,8 +147,11 @@ export function Sidebar() {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <div className="mt-4 flex justify-center">
+                    <div className="mt-4 flex flex-col items-center gap-2">
                         <LanguageSwitcher />
+                        <span className="text-[10px] text-muted-foreground opacity-30 mt-2 italic">
+                            Ultimo Aggiornamento: {new Date().toLocaleTimeString('it-IT')}
+                        </span>
                     </div>
                 </div>
             </div>
