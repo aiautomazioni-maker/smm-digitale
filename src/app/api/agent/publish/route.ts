@@ -484,7 +484,7 @@ export async function POST(req: Request) {
                 const initData = await initRes.json();
                 console.log("[TIKTOK] Init response:", JSON.stringify(initData));
 
-                if (initData.error || !initData.data?.upload_url) {
+                if ((initData.error && initData.error.code !== "ok") || !initData.data?.upload_url) {
                     const errMsg = initData.error?.message || initData.data?.error?.message || "TikTok Init failed";
                     console.error("TikTok Init Error:", initData);
                     // Provide detailed debug for user
