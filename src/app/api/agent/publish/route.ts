@@ -452,9 +452,11 @@ export async function POST(req: Request) {
                 const creatorData = await creatorRes.json();
                 console.log("[TIKTOK] Creator Info:", JSON.stringify(creatorData));
 
-                let allowedPrivacy = "SELF_ONLY";
-                if (creatorData.data?.privacy_level_options?.length > 0) {
-                    allowedPrivacy = creatorData.data.privacy_level_options[0]; // pick the most restrictive or whatever is first
+                let allowedPrivacy = "SELF_ONLY"; // Force SELF_ONLY for sandbox apps regardless of what the user account supports
+                if (creatorData.data?.privacy_level_options?.includes("SELF_ONLY")) {
+                    allowedPrivacy = "SELF_ONLY";
+                } else if (creatorData.data?.privacy_level_options?.length > 0) {
+                    allowedPrivacy = creatorData.data.privacy_level_options[0];
                 }
 
                 // Step 2: Init the upload with FILE_UPLOAD (no domain verification needed)
@@ -468,7 +470,7 @@ export async function POST(req: Request) {
                     body: JSON.stringify({
                         post_info: {
                             title: payload.caption_final ? payload.caption_final.substring(0, 150) : "Video from SMM Digitale",
-                            privacy_level: allowedPrivacy,
+                            privacy_level: "SELF_ONLY", // Force SELF_ONLY for Sandbox
                             disable_duet: false,
                             disable_comment: false,
                             disable_stitch: false,
