@@ -203,7 +203,7 @@ export default function ProfilesPage() {
                 <TabsContent value="posts">
                     {profile.posts.length > 0 ? (
                         <div className="grid grid-cols-3 gap-1 md:gap-4">
-                            {profile.posts.map((post) => (
+                            {profile.posts.map((post: any) => (
                                 <Dialog
                                     key={post.id}
                                     open={selectedPost?.id === post.id}
