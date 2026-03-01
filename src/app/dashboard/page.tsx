@@ -95,10 +95,10 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.followers >= 1000 ? `${(tiktokData.followers / 1000).toFixed(1)}K` : tiktokData.followers) : "42.8K")}
+                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.followers >= 1000 ? `${(tiktokData.followers / 1000).toFixed(1)}K` : tiktokData.followers) : "N / A")}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {tiktokData !== null ? "Dati reali TikTok" : "+8.1% dal mese scorso"}
+                            {tiktokData !== null ? "Dati reali TikTok" : "TikTok non connesso"}
                         </p>
                     </CardContent>
                 </Card>
@@ -109,10 +109,10 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.views >= 1000 ? `${(tiktokData.views / 1000).toFixed(1)}K` : tiktokData.views) : "128.4K")}
+                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.views >= 1000 ? `${(tiktokData.views / 1000).toFixed(1)}K` : tiktokData.views) : "N / A")}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {tiktokData !== null ? `Ultimi video: ${tiktokData.videos}` : "+45% (Effetto virale 🚀)"}
+                            {tiktokData !== null ? `Ultimi video: ${tiktokData.videos}` : "Configura account"}
                         </p>
                     </CardContent>
                 </Card>
