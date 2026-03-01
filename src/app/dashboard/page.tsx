@@ -5,7 +5,7 @@ import { useTranslation } from "@/context/LanguageContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Heart, Share2, MoreHorizontal, MessageSquare, ArrowRight } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, MessageCircle, Heart, Share2, MoreHorizontal, MessageSquare, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { EngagementChart } from "@/components/dashboard/EngagementChart";
@@ -25,7 +25,7 @@ const RECENT_MESSAGES = [
 
 export default function DashboardPage() {
     const { t } = useTranslation();
-    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number } | null>(null);
+    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number, display_name?: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -47,11 +47,39 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-8 pb-10 text-white">
-            {/* Header */}
+            {/* Hero Section */}
+            <section className="relative overflow-hidden rounded-3xl bg-instagram-gradient p-10 text-white shadow-2xl">
+                <div className="relative z-10 space-y-4 max-w-2xl">
+                    <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-md">
+                        Bentornato, {tiktokData?.display_name || "Automazioni AI"}! 🚀
+                    </h1>
+                    <p className="text-xl font-medium text-white/90">
+                        Il tuo assistente AI è pronto. Oggi è il giorno perfetto per lanciare il prossimo trend.
+                    </p>
+                    <div className="flex gap-4 pt-4">
+                        <Link href="/new-post">
+                            <button className="bg-white text-purple-600 px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform shadow-lg flex items-center">
+                                <Plus className="mr-2 w-5 h-5" /> Crea Subito
+                            </button>
+                        </Link>
+                        <Link href="/calendar">
+                            <button className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-all flex items-center">
+                                <CalendarIcon className="mr-2 w-5 h-5" /> Vedi Calendario
+                            </button>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Abstract Shapes Decoration */}
+                <div className="absolute -right-20 -top-40 w-96 h-96 bg-yellow-300 rounded-full mix-blend-overlay filter blur-3xl opacity-50 animate-pulse" />
+                <div className="absolute -right-20 bottom-0 w-80 h-80 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl opacity-50" />
+            </section>
+
+            {/* Header (Stats Summary) */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h1>
-                    <p className="text-muted-foreground">{t("dashboard.welcome")}</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Panoramica Canale</h1>
+                    <p className="text-sm text-muted-foreground">Performance in tempo reale</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <NotificationBell />
