@@ -25,7 +25,7 @@ const RECENT_MESSAGES = [
 
 export default function DashboardPage() {
     const { t } = useTranslation();
-    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number, display_name?: string } | null>(null);
+    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number, videos: number, display_name?: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -95,10 +95,10 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? "..." : (tiktokData?.followers ? `${(tiktokData.followers / 1000).toFixed(1)}K` : "42.8K")}
+                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.followers >= 1000 ? `${(tiktokData.followers / 1000).toFixed(1)}K` : tiktokData.followers) : "42.8K")}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {tiktokData?.followers ? "Dati reali TikTok" : "+8.1% dal mese scorso"}
+                            {tiktokData !== null ? "Dati reali TikTok" : "+8.1% dal mese scorso"}
                         </p>
                     </CardContent>
                 </Card>
@@ -109,10 +109,10 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? "..." : (tiktokData?.views ? `${(tiktokData.views / 1000).toFixed(1)}K` : "128.4K")}
+                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.views >= 1000 ? `${(tiktokData.views / 1000).toFixed(1)}K` : tiktokData.views) : "128.4K")}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {tiktokData?.views ? "Ultimi 10 video" : "+45% (Effetto virale 🚀)"}
+                            {tiktokData !== null ? `Ultimi video: ${tiktokData.videos}` : "+45% (Effetto virale 🚀)"}
                         </p>
                     </CardContent>
                 </Card>

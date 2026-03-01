@@ -158,7 +158,7 @@ export default function CalendarPage() {
             </div>
 
             {/* Calendar Grid */}
-            <div className="flex-1 min-h-0 bg-black/20 border border-white/10 rounded-xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="flex-1 min-h-0 bg-black/20 border border-white/10 rounded-xl overflow-auto shadow-2xl flex flex-col">
                 {/* Days Header */}
                 <div className="grid grid-cols-7 border-b border-white/10 bg-white/5">
                     {((t("calendar.days") as string[]) || ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']).map((day: string, index: number) => (
