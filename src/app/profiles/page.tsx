@@ -20,36 +20,36 @@ import { createRepurposePlan, RepurposePlanResponse } from "@/lib/story-engine";
 const PROFILES = [
     {
         id: "ig-main",
-        name: "Caffè Artisan",
-        handle: "@caffeartisan",
+        name: "Automazioni AI",
+        handle: "@automazioniai",
         platform: "Instagram",
-        image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=200",
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200",
         stats: {
-            followers: "12.5K",
-            following: "450",
-            posts: "342",
-            engagement: "4.8%"
+            followers: "15.7K",
+            following: "890",
+            posts: "156",
+            engagement: "5.2%"
         },
         posts: [
-            { id: 1, image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085", likes: 124, comments: 12, commentList: [{ user: "marcorossi", text: "Bellissimo locale!", time: "2h" }, { user: "giuliab", text: "Verrò sicuramente a trovarvi 😍", time: "5h" }] },
-            { id: 2, image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93", likes: 89, comments: 5, commentList: [{ user: "foodlover", text: "Che bontà!", time: "1g" }] },
-            { id: 3, image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd", likes: 210, comments: 34, commentList: [{ user: "techbro", text: "Ottimo caffè", time: "2g" }] },
-            { id: 4, image: "https://images.unsplash.com/photo-1511920170033-f8396924c348", likes: 156, comments: 18, commentList: [] },
-            { id: 5, image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf", likes: 98, comments: 8, commentList: [] },
-            { id: 6, image: "https://images.unsplash.com/photo-1511537632536-34a7469543aa", likes: 302, comments: 45, commentList: [] },
+            { id: 1, image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e", likes: 450, comments: 24, commentList: [{ user: "tech_guru", text: "L'automazione CRM è pazzesca!", time: "2h" }, { user: "digital_agency", text: "Ottimo lavoro con questo bot 🚀", time: "5h" }] },
+            { id: 2, image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5", likes: 320, comments: 15, commentList: [{ user: "startup_ltd", text: "Quanto tempo fa risparmiare?", time: "1g" }] },
+            { id: 3, image: "https://images.unsplash.com/photo-1518770660439-4636190af475", likes: 510, comments: 42, commentList: [{ user: "marco_dev", text: "Integrazione API pulitissima", time: "2g" }] },
+            { id: 4, image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b", likes: 215, comments: 18, commentList: [] },
+            { id: 5, image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1", likes: 180, comments: 8, commentList: [] },
+            { id: 6, image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa", likes: 640, comments: 75, commentList: [] },
         ]
     },
     {
         id: "fb-main",
-        name: "Caffè Artisan (Pagina)",
-        handle: "Caffè Artisan Official",
+        name: "Automazioni AI (Business)",
+        handle: "Automazioni AI Official",
         platform: "Facebook",
-        image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=200",
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200",
         stats: {
-            followers: "8.2K",
-            likes: "7.9K",
-            posts: "156",
-            engagement: "2.1%"
+            followers: "10.2K",
+            likes: "9.8K",
+            posts: "84",
+            engagement: "3.4%"
         },
         posts: []
     }
@@ -149,11 +149,11 @@ export default function ProfilesPage() {
                             <div className="max-w-md">
                                 <p className="font-semibold">{profile.name}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    ☕️ Artisan Coffee Roasters <br />
-                                    📍 Milano, Italia <br />
-                                    👇 Prenota il tuo tavolo
+                                    🤖 AI Automation Agency <br />
+                                    🌐 Scaliamo il tuo business con l'Intelligenza Artificiale <br />
+                                    👇 Prenota una consulenza gratuita
                                 </p>
-                                <a href="#" className="text-blue-400 text-sm hover:underline">linktr.ee/caffeartisan</a>
+                                <a href="https://automazioniai.com" className="text-blue-400 text-sm hover:underline">automazioniai.com</a>
                             </div>
                         </div>
                     </div>

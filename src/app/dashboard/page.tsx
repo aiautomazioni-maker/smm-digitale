@@ -10,15 +10,15 @@ import Link from "next/link";
 
 // Mock Data
 const RECENT_COMMENTS = [
-    { id: 1, user: { name: "Giulia B.", handle: "@giuliab", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d" }, text: "Bellissimo locale, verrò sicuramente a trovarvi!", time: "2h fa", postImg: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=100" },
-    { id: 2, user: { name: "Marco Rossi", handle: "@marcorossi", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d" }, text: "Che bontà 😍", time: "5h fa", postImg: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=100" },
-    { id: 3, user: { name: "Anna Verdi", handle: "@anna.v12", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026034d" }, text: "A che ora aprite domenica?", time: "1g fa", postImg: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=100" },
+    { id: 1, user: { name: "Marco B.", handle: "@marcob_digital", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d" }, text: "Quanto costa implementare un chatbot per il mio e-commerce?", time: "2h fa", postImg: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=100&q=80" },
+    { id: 2, user: { name: "Sara Tech", handle: "@sara_tech", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d" }, text: "L'integrazione con WhatsApp è geniale! 🚀", time: "5h fa", postImg: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=100&q=80" },
+    { id: 3, user: { name: "Luca Neri", handle: "@lneri88", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026034d" }, text: "Fate anche automazioni per lead generation su Facebook?", time: "1g fa", postImg: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=100&q=80" },
 ];
 
 const RECENT_MESSAGES = [
-    { id: 1, user: { name: "Food Advisor Milano", platform: "instagram", avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d" }, text: "Complimenti per i vostri nuovi scatti! Sarebbe f...", time: "10:42", unread: true },
-    { id: 2, user: { name: "Luca Bianchi", platform: "facebook", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026714d" }, text: "Salve, fate opzioni senza glutine?", time: "Ieri", unread: false },
-    { id: 3, user: { name: "Sara Neri", platform: "instagram", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026724d" }, text: "Grazie mille!", time: "Lun", unread: false },
+    { id: 1, user: { name: "Tech Advisor Hub", platform: "instagram", avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d" }, text: "Ciao! Vorremmo capire meglio come funziona il vostro content engine per agenzie.", time: "10:42", unread: true },
+    { id: 2, user: { name: "Giovanni Bianchi", platform: "facebook", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026714d" }, text: "Avete casistiche di successo su b2b?", time: "Ieri", unread: false },
+    { id: 3, user: { name: "Elena Verdi", platform: "instagram", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026724d" }, text: "Grazie per la demo di ieri, molto utile.", time: "Lun", unread: false },
 ];
 
 export default function DashboardPage() {
@@ -37,7 +37,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* Quick Stats (Optional placeholders to make it look like a dashboard) */}
+            {/* Quick Stats */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -45,38 +45,38 @@ export default function DashboardPage() {
                         <Heart className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">20.7K</div>
-                        <p className="text-xs text-muted-foreground">+2.1% dal mese scorso</p>
+                        <div className="text-2xl font-bold">42.8K</div>
+                        <p className="text-xs text-muted-foreground">+8.1% dal mese scorso</p>
                     </CardContent>
                 </Card>
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Interazioni</CardTitle>
+                        <CardTitle className="text-sm font-medium">TikTok Views</CardTitle>
+                        <Share2 className="h-4 w-4 text-pink-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">128.4K</div>
+                        <p className="text-xs text-muted-foreground">+45% (Effetto virale 🚀)</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Lead Generati</CardTitle>
                         <MessageCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">+1,234</div>
-                        <p className="text-xs text-muted-foreground">+12% dal mese scorso</p>
+                        <div className="text-2xl font-bold">+184</div>
+                        <p className="text-xs text-muted-foreground">+22% rispetto a ieri</p>
                     </CardContent>
                 </Card>
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Condivisioni</CardTitle>
-                        <Share2 className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">342</div>
-                        <p className="text-xs text-muted-foreground">+8% dal mese scorso</p>
-                    </CardContent>
-                </Card>
-                <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Post Generati (AI)</CardTitle>
+                        <CardTitle className="text-sm font-medium">Automazioni Attive</CardTitle>
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">14</div>
-                        <p className="text-xs text-muted-foreground">Su 30 previsti questo mese</p>
+                        <p className="text-xs text-muted-foreground">Bot e workflow in esecuzione</p>
                     </CardContent>
                 </Card>
             </div>

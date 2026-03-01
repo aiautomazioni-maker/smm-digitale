@@ -41,7 +41,12 @@ export async function POST(req: Request) {
         });
 
     } catch (err: any) {
-        console.error('[UPLOAD_URL] Exception:', err);
-        return NextResponse.json({ error: err.message || 'Signature failed' }, { status: 500 });
+        console.error('[UPLOAD_URL] Exception full:', err);
+        console.error('[UPLOAD_URL] Stack:', err.stack);
+        console.error('[UPLOAD_URL] Cause:', err.cause);
+        return NextResponse.json({
+            error: err.message || 'Signature failed',
+            cause: err.cause?.message || String(err.cause)
+        }, { status: 500 });
     }
 }

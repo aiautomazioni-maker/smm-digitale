@@ -121,10 +121,10 @@ function SettingsPageInner() {
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {[
-                                { name: 'Instagram', connected: true, accountName: '@caffeartisan' },
-                                { name: 'Facebook', connected: false, accountName: null },
+                                { name: 'Instagram', connected: true, accountName: '@automazioniai' },
+                                { name: 'Facebook', connected: true, accountName: 'Automazioni AI' },
                                 { name: 'LinkedIn', connected: false, accountName: null },
-                                { name: 'TikTok', connected: tiktokConnected, accountName: tiktokConnected ? 'Connesso' : null }
+                                { name: 'TikTok', connected: tiktokConnected, accountName: tiktokConnected ? 'Automazioni AI' : null }
                             ].map(social => (
                                 <div key={social.name} className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                                     <div className="flex items-center gap-4">

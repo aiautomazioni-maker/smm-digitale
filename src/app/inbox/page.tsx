@@ -29,12 +29,12 @@ const MOCK_CHATS = [
     {
         id: "chat-1",
         user: { name: "Marco Rossi", handle: "@marcorossi", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d", platform: "instagram" },
-        lastMessage: "A che ora aprite stasera?",
+        lastMessage: "Potete integrare ChatGPT nel mio CRM?",
         time: "10:42",
         unread: true,
         messages: [
-            { id: 1, text: "Ciao! Volevo prenotare un tavolo per due.", sender: "user", time: "10:40" },
-            { id: 2, text: "A che ora aprite stasera?", sender: "user", time: "10:42" }
+            { id: 1, text: "Ciao! Ho visto il vostro ultimo video sulle automazioni CRM.", sender: "user", time: "10:40" },
+            { id: 2, text: "Potete integrare ChatGPT nel mio CRM Salesforce?", sender: "user", time: "10:42" }
         ]
     },
     {
@@ -44,19 +44,19 @@ const MOCK_CHATS = [
         time: "Ieri",
         unread: false,
         messages: [
-            { id: 1, text: "Salve, fate opzioni senza glutine?", sender: "user", time: "Ieri 15:30" },
-            { id: 2, text: "Certamente! Abbiamo pizze e pasta senza glutine certificate.", sender: "me", time: "Ieri 16:00" },
+            { id: 1, text: "Salve, create anche chatbot per la gestione appuntamenti?", sender: "user", time: "Ieri 15:30" },
+            { id: 2, text: "Certamente! Abbiamo sistemi AI che si collegano direttamente a Google Calendar o Calendly.", sender: "me", time: "Ieri 16:00" },
             { id: 3, text: "Grazie mille per le informazioni!", sender: "user", time: "Ieri 16:05" }
         ]
     },
     {
         id: "chat-3",
-        user: { name: "Food Advisor Milano", handle: "@foodadvisor_mi", avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d", platform: "instagram" },
-        lastMessage: "Sarebbe fantastico collaborare sulle nuove proposte estive.",
+        user: { name: "Tech Advisor Italy", handle: "@techadvisor_it", avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d", platform: "instagram" },
+        lastMessage: "Sarebbe fantastico collaborare sulle nuove soluzioni AI per PMI.",
         time: "Lun",
         unread: false,
         messages: [
-            { id: 1, text: "Complimenti per i vostri nuovi scatti! Sarebbe fantastico collaborare sulle nuove proposte estive.", sender: "user", time: "Lun 09:15" }
+            { id: 1, text: "Complimenti per i vostri contenuti! Sarebbe fantastico collaborare sulle nuove soluzioni AI per PMI.", sender: "user", time: "Lun 09:15" }
         ]
     }
 ];
@@ -251,7 +251,7 @@ export default function InboxPage() {
                                     <Send className="w-4 h-4 ml-0.5" />
                                 </Button>
                             </form>
-                            <p className="text-[10px] text-center text-muted-foreground mt-2">I messaggi verranno inviati come {activeChat.user.platform === 'instagram' ? '@caffeartisan' : 'Caffè Artisan Official'}</p>
+                            <p className="text-[10px] text-center text-muted-foreground mt-2">I messaggi verranno inviati come {activeChat.user.platform === 'instagram' ? '@automazioniai' : 'Automazioni AI Official'}</p>
                         </div>
                     </>
                 ) : (

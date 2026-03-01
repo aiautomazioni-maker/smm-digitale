@@ -129,15 +129,15 @@ export function generateStorySequencePlan(input: any): SequencePlanResponse {
                     role: "hook",
                     creative: {
                         asset_action: "ai_generate",
-                        prompt_en: "A beautiful artisan coffee cup on a wooden table, warm cinematic lighting, minimal background",
-                        negative_prompt_en: "text, watermark, messy, people",
+                        prompt_en: "A futuristic AI agency office, glowing holographic screens, sleek white and blue lighting, professional atmosphere",
+                        negative_prompt_en: "messy, old, dark, plants",
                         edit_instruction_en: null,
                         background_style_notes: ["Dark mood", "High contrast"],
                         overlay_plan: [
                             {
                                 id: "h1",
                                 type: "text",
-                                text: "Il tuo caffè non è mai stato così buono.",
+                                text: "L'AI che scala il tuo business.",
                                 max_chars: 60,
                                 position_zone: "top",
                                 alignment: "center",
@@ -172,7 +172,7 @@ export function generateStorySequencePlan(input: any): SequencePlanResponse {
                     stickers_plan: [
                         {
                             type: "link",
-                            value: "https://caffeartisan.it/prenota",
+                            value: "https://automazioniai.com/consulenza",
                             position_zone: "bottom",
                             fallback: "Link in Bio"
                         }
