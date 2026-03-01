@@ -451,7 +451,7 @@ export async function POST(req: Request) {
                     body: JSON.stringify({
                         post_info: {
                             title: payload.caption_final.substring(0, 150),
-                            privacy_level: "MUTUAL_FOLLOW_FRIENDS", // Must not be PUBLIC for unaudited Sandbox apps
+                            privacy_level: "SELF_ONLY", // ONLY "SELF_ONLY" is allowed for unaudited Sandbox apps
                         },
                         source_info: {
                             source: "FILE_UPLOAD",
