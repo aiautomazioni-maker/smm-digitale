@@ -24,6 +24,21 @@ export default function VideoTimelineEditor() {
     const [isEditing, setIsEditing] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
 
+    // Compute the actual video URL to display
+    const targetMediaUrl = fullPlan?.publish_jobs?.[0]?.media_url
+        || fullPlan?.video_project?.original_video_url
+        || '';
+
+    const getFilterCss = (filterName: string) => {
+        switch (filterName) {
+            case 'warm': return 'sepia(30%) contrast(110%) brightness(105%)';
+            case 'cool': return 'hue-rotate(15deg) saturate(80%) brightness(105%)';
+            case 'vibrant': return 'saturate(150%) contrast(110%)';
+            case 'bw': return 'grayscale(100%) contrast(120%)';
+            default: return 'none';
+        }
+    };
+
     useEffect(() => {
         if (fullPlan?.editor_edl) {
             const e = fullPlan.editor_edl;
@@ -86,12 +101,6 @@ export default function VideoTimelineEditor() {
         if (!fullPlan) return;
         setIsPublishing(true);
         try {
-            // Prefer the generated/rendered media URL first. 
-            // If it's a direct upload (no render), fallback to the original uploaded URL in the EDL or manifest.
-            const targetMediaUrl = fullPlan.publish_jobs?.[0]?.media_url
-                || fullPlan.video_project?.original_video_url
-                || '';
-
             if (!targetMediaUrl || targetMediaUrl.includes('example.com')) {
                 toast.error("Nessun video valido trovato per la pubblicazione.");
                 setIsPublishing(false);
@@ -182,13 +191,25 @@ export default function VideoTimelineEditor() {
                 {/* PREVIEW WINDOW */}
                 <div className="w-1/2 flex flex-col gap-4">
                     <div className="aspect-[9/16] bg-black rounded-lg border border-white/20 relative overflow-hidden flex items-center justify-center group">
-                        <ImageIcon className="w-12 h-12 text-white/20" />
+                        {targetMediaUrl ? (
+                            <video
+                                src={targetMediaUrl}
+                                className="w-full h-full object-cover"
+                                loop
+                                autoPlay
+                                muted
+                                playsInline
+                                style={{ filter: getFilterCss(activeFilter) }}
+                            />
+                        ) : (
+                                <ImageIcon className="w-12 h-12 text-white/20" />
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
                         {/* Overlay Simulation */}
                         {overlayText && (
-                            <div className="absolute inset-x-0 bottom-24 text-center">
-                                <span className="bg-black/50 text-white font-bold text-2xl px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm">
+                            <div className="absolute inset-x-0 bottom-24 text-center px-4 w-full">
+                                <span className="bg-black/70 text-white font-bold text-xl md:text-2xl px-4 py-2 rounded-lg border border-white/10 backdrop-blur-md shadow-xl inline-block max-w-[90%] break-words">
                                     {overlayText}
                                 </span>
                             </div>
