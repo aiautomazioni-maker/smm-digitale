@@ -19,6 +19,20 @@ import { createRepurposePlan, RepurposePlanResponse } from "@/lib/story-engine";
 // Mock Profiles Data
 const PROFILES = [
     {
+        id: "tiktok",
+        name: "Automazioni AI",
+        handle: "@automazioniai",
+        platform: "TikTok",
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200",
+        stats: {
+            followers: "0",
+            likes: "0",
+            posts: "0",
+            engagement: "0%"
+        },
+        posts: []
+    },
+    {
         id: "ig-main",
         name: "Automazioni AI",
         handle: "@automazioniai",
@@ -38,27 +52,16 @@ const PROFILES = [
             { id: 5, image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1", likes: 180, comments: 8, commentList: [] },
             { id: 6, image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa", likes: 640, comments: 75, commentList: [] },
         ]
-    },
-    {
-        id: "fb-main",
-        name: "Automazioni AI (Business)",
-        handle: "Automazioni AI Official",
-        platform: "Facebook",
-        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200",
-        stats: {
-            followers: "10.2K",
-            likes: "9.8K",
-            posts: "84",
-            engagement: "3.4%"
-        },
-        posts: []
     }
 ];
 
+import { useEffect } from "react";
+
 export default function ProfilesPage() {
     const { t } = useTranslation();
-    const [selectedProfileId, setSelectedProfileId] = useState("ig-main");
+    const [selectedProfileId, setSelectedProfileId] = useState("tiktok");
     const [selectedPost, setSelectedPost] = useState<any>(null);
+    const [tiktokInfo, setTiktokInfo] = useState<any>(null);
 
     // Repurpose Flow States
     const [repurposeMode, setRepurposeMode] = useState<"disabled" | "config" | "loading" | "preview">("disabled");
@@ -68,7 +71,37 @@ export default function ProfilesPage() {
     const [rCtaType, setRCtaType] = useState("link");
     const [rCtaValue, setRCtaValue] = useState("");
 
-    const profile = PROFILES.find(p => p.id === selectedProfileId) || PROFILES[0];
+    useEffect(() => {
+        async function fetchTikTok() {
+            try {
+                const res = await fetch('/api/tiktok/analytics');
+                if (res.ok) {
+                    const data = await res.json();
+                    setTiktokInfo(data);
+                }
+            } catch (err) {
+                console.error("Failed to load TikTok profile", err);
+            }
+        }
+        fetchTikTok();
+    }, []);
+
+    let profile: any = PROFILES.find(p => p.id === selectedProfileId) || PROFILES[0];
+
+    // Merge real TikTok data if available
+    if (selectedProfileId === 'tiktok' && tiktokInfo) {
+        profile = {
+            ...profile,
+            name: tiktokInfo.display_name || profile.name,
+            image: tiktokInfo.avatar || profile.image,
+            stats: {
+                ...profile.stats,
+                followers: tiktokInfo.followers >= 1000 ? `${(tiktokInfo.followers / 1000).toFixed(1)}K` : tiktokInfo.followers.toString(),
+                likes: tiktokInfo.likes >= 1000 ? `${(tiktokInfo.likes / 1000).toFixed(1)}K` : tiktokInfo.likes.toString(),
+                posts: tiktokInfo.videos.toString()
+            }
+        };
+    }
 
     const resetRepurpose = () => {
         setRepurposeMode("disabled");
