@@ -57,31 +57,9 @@ export default function VideoTimelineEditor() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    lang: 'it',
-                    workspace_id: 'temp_ws',
-                    existing_video_project: fullPlan.video_project,
-                    existing_script: fullPlan.script,
-                    existing_storyboard: fullPlan.storyboard,
+                    user_prompt: editPrompt,
                     current_editor_edl: fullPlan.editor_edl,
                     current_copy: fullPlan.copy,
-                    edit_request: {
-                        change_filters: true,
-                        new_filter_style: editPrompt.includes('filter') ? 'vibrant' : '', // Simplified logic for demo
-                        improve_quality: true,
-                        change_subtitles: true,
-                        subtitle_mode: 'word',
-                        change_music: true,
-                        music_mood: editPrompt,
-                        change_caption: true,
-                        new_cta: 'Link in Bio!',
-                        regenerate_cover: true,
-                        cover_style: 'bold'
-                    },
-                    capabilities: {
-                        has_safe_music_library: false,
-                        supports_platform_music: true
-                    }
-                    // safeMode: true
                 })
             });
 
