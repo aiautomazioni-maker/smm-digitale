@@ -470,10 +470,7 @@ export async function POST(req: Request) {
                     body: JSON.stringify({
                         post_info: {
                             title: payload.caption_final ? payload.caption_final.substring(0, 150) : "Video from SMM Digitale",
-                            privacy_level: "SELF_ONLY", // Force SELF_ONLY for Sandbox
-                            disable_duet: false,
-                            disable_comment: false,
-                            disable_stitch: false,
+                            privacy_level: "SELF_ONLY" // Force SELF_ONLY for Sandbox
                         },
                         source_info: {
                             source: "FILE_UPLOAD",
