@@ -97,8 +97,3 @@ export default function AdsPage() {
         </div>
     );
 }
-
-            </Tabs >
-        </div >
-    );
-}
