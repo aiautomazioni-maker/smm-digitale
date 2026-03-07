@@ -6,13 +6,14 @@ export async function GET() {
     try {
         const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
         const INSTAGRAM_ACCOUNT_ID = process.env.INSTAGRAM_ACCOUNT_ID;
+        const FB_PAGE_ID = process.env.FB_PAGE_ID;
 
-        if (!FB_ACCESS_TOKEN || !INSTAGRAM_ACCOUNT_ID) {
-            return NextResponse.json({ error: "Missing API credentials" }, { status: 500 });
+        if (!FB_ACCESS_TOKEN || !FB_PAGE_ID) {
+            return NextResponse.json({ error: "Missing API credentials (FB_PAGE_ID or Token)" }, { status: 500 });
         }
 
-        // Fetch Conversations from Instagram Graph API
-        const url = `https://graph.facebook.com/v19.0/${INSTAGRAM_ACCOUNT_ID}/conversations?platform=instagram&fields=id,updated_time,participants,messages{id,message,created_time,from}&access_token=${FB_ACCESS_TOKEN}`;
+        // Fetch Conversations from Instagram Graph API (using Page ID with platform=instagram)
+        const url = `https://graph.facebook.com/v19.0/${FB_PAGE_ID}/conversations?platform=instagram&fields=id,updated_time,participants,messages{id,message,created_time,from}&access_token=${FB_ACCESS_TOKEN}`;
         
         const response = await fetch(url, { cache: 'no-store' });
         const data = await response.json();
