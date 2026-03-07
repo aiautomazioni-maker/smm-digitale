@@ -13,27 +13,48 @@ import { EngagementChart } from "@/components/dashboard/EngagementChart";
 
 export default function DashboardPage() {
     const { t } = useTranslation();
-    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number, videos: number, display_name?: string } | null>(null);
+    const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number, videos: number, display_name?: string, recent_comments?: any[] } | null>(null);
     const [dashboardStats, setDashboardStats] = useState<any>(null);
+    const [dashboardInbox, setDashboardInbox] = useState<any[]>([]); // New state for DMs
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchAnalytics() {
             try {
-                const [ttRes, statsRes] = await Promise.all([
+                const [ttRes, statsRes, igRes, inboxRes] = await Promise.all([
                     fetch('/api/tiktok/analytics'),
-                    fetch('/api/dashboard/stats')
+                    fetch('/api/dashboard/stats'),
+                    fetch('/api/instagram/analytics'),
+                    fetch('/api/instagram/inbox') // Fetch real DMs
                 ]);
 
                 if (ttRes.ok) {
                     const data = await ttRes.json();
-                    setTiktokData(data);
+                    setTiktokData(data); // Will hold TikTok specific stats
                 }
 
                 if (statsRes.ok) {
                     const data = await statsRes.json();
                     setDashboardStats(data);
                 }
+
+                if (igRes.ok) {
+                    const igData = await igRes.json();
+                    if (igData.success || igData.recent_comments) {
+                        setTiktokData(prev => ({
+                            ...(prev || { followers: 0, views: 0, likes: 0, videos: 0 }),
+                            recent_comments: igData.recent_comments || []
+                        }));
+                    }
+                }
+
+                if (inboxRes.ok) {
+                    const inboxData = await inboxRes.json();
+                    if (inboxData.success && inboxData.chats) {
+                        setDashboardInbox(inboxData.chats.slice(0, 3)); // Store latest 3 chats
+                    }
+                }
+
             } catch (err) {
                 console.error("Failed to fetch analytics", err);
             } finally {
@@ -147,12 +168,29 @@ export default function DashboardPage() {
                             </Button>
                         </Link>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-center">
-                            <MessageCircle className="w-12 h-12 mb-3 opacity-20" />
-                            <p>Nessun commento recente.</p>
-                            <p className="text-xs mt-1">Le interazioni reali verranno visualizzate qui.</p>
-                        </div>
+                    <CardContent className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                        {isLoading ? (
+                            <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>
+                        ) : tiktokData?.recent_comments && tiktokData.recent_comments.length > 0 ? (
+                            tiktokData.recent_comments.map((comment: any, idx: number) => (
+                                <div key={idx} className="flex gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <Avatar className="w-8 h-8 shrink-0">
+                                        <AvatarFallback>{comment.username?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="text-xs font-bold">{comment.username || "Utente"}</p>
+                                        <p className="text-sm mt-0.5 text-white/90">{comment.text}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-1">Sui tuoi post recenti</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-center">
+                                <MessageCircle className="w-12 h-12 mb-3 opacity-20" />
+                                <p>Nessun commento recente.</p>
+                                <p className="text-xs mt-1">Le interazioni reali verranno visualizzate qui.</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -169,10 +207,33 @@ export default function DashboardPage() {
                             </Button>
                         </Link>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground text-center py-10">
-                            Nessun messaggio diretto.
-                        </p>
+                    <CardContent className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                        {isLoading ? (
+                            <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>
+                        ) : dashboardInbox && dashboardInbox.length > 0 ? (
+                            dashboardInbox.map((chat: any, idx: number) => (
+                                <Link href="/inbox" key={idx}>
+                                    <div className="flex gap-3 bg-white/5 p-3 rounded-lg border border-white/5 hover:bg-white/10 transition-colors cursor-pointer mb-3">
+                                        <Avatar className="w-10 h-10 shrink-0 border border-white/10">
+                                            <AvatarFallback>{chat.user.name[0]?.toUpperCase() || "U"}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-bold truncate pr-2">{chat.user.name}</p>
+                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">{chat.time}</span>
+                                            </div>
+                                            <p className="text-xs mt-0.5 text-muted-foreground truncate">{chat.lastMessage}</p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-center">
+                                <MessageCircle className="w-12 h-12 mb-3 opacity-20" />
+                                <p>Nessun messaggio diretto.</p>
+                                <p className="text-xs mt-1">La tua casella è vuota.</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

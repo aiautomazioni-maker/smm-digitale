@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, Image as ImageIcon, Smile, MoreVertical, MessageCircle, User, FileText, CheckCheck, X, ChevronLeft } from "lucide-react";
+import { Search, Send, Image as ImageIcon, Smile, MoreVertical, MessageCircle, User, FileText, CheckCheck, X, ChevronLeft, Loader2 } from "lucide-react";
 import { useTranslation } from "@/context/LanguageContext";
 import {
     DropdownMenu,
@@ -24,14 +24,36 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-// Dati Iniziali (Vuoti in attesa di fetch reale)
-const MOCK_CHATS: any[] = [];
-
 export default function InboxPage() {
     const { t } = useTranslation();
-    const [chats, setChats] = useState(MOCK_CHATS);
-    const [activeChatId, setActiveChatId] = useState(MOCK_CHATS[0].id);
+    const [chats, setChats] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
+
+    // Fetch real Instagram DMs on load
+    useEffect(() => {
+        async function loadInbox() {
+            try {
+                const res = await fetch('/api/instagram/inbox');
+                const data = await res.json();
+                if (data.success && data.chats) {
+                    setChats(data.chats);
+                    if (data.chats.length > 0) {
+                        setActiveChatId(data.chats[0].id);
+                    }
+                } else if (data.error) {
+                    toast.error("Errore nel caricamento messaggi: " + data.error);
+                }
+            } catch (err) {
+                console.error("Failed to fetch inbox", err);
+                toast.error("Errore di connessione a Instagram.");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadInbox();
+    }, []);
 
     // Mobile View State
     const [showMobileChat, setShowMobileChat] = useState(false);
@@ -101,33 +123,46 @@ export default function InboxPage() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                    {chats.map(chat => (
-                        <div
-                            key={chat.id}
-                            onClick={() => handleSelectChat(chat.id)}
-                            className={`p-4 border-b border-white/5 cursor-pointer transition-colors hover:bg-white/5 flex gap-3
-                                ${activeChatId === chat.id ? "bg-white/10" : ""}
-                                ${chat.unread ? "bg-white/[0.02]" : ""}
-                            `}
-                        >
-                            <div className="relative">
-                                <Avatar className="w-12 h-12 border border-white/10">
-                                    <AvatarImage src={chat.user.avatar} />
-                                    <AvatarFallback>{chat.user.name[0]}</AvatarFallback>
-                                </Avatar>
-                                {chat.user.platform === 'instagram' && <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 border border-black flex items-center justify-center text-[8px] text-white">IG</div>}
-                                {chat.user.platform === 'facebook' && <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-600 border border-black flex items-center justify-center text-[8px] text-white">f</div>}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className={`truncate text-sm ${chat.unread ? "font-bold text-white" : "font-medium text-foreground"}`}>{chat.user.name}</h3>
-                                    <span className={`text-xs ${chat.unread ? "text-blue-400 font-bold" : "text-muted-foreground"}`}>{chat.time}</span>
-                                </div>
-                                <p className={`truncate text-xs ${chat.unread ? "font-semibold text-white" : "text-muted-foreground"}`}>{chat.lastMessage}</p>
-                            </div>
-                            {chat.unread && <div className="w-2 h-2 mt-2 rounded-full bg-blue-500 shrink-0" />}
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
+                            <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-500" />
+                            <p className="text-sm">Caricamento messaggi...</p>
                         </div>
-                    ))}
+                    ) : chats.length === 0 ? (
+                        <div className="flex flex-col items-center text-center justify-center h-full p-8 text-muted-foreground">
+                            <MessageCircle className="w-12 h-12 mb-3 opacity-20" />
+                            <p className="text-sm">La cartella è vuota.</p>
+                            <p className="text-xs mt-1">Non ci sono nuovi messaggi al momento.</p>
+                        </div>
+                    ) : (
+                        chats.map(chat => (
+                            <div
+                                key={chat.id}
+                                onClick={() => handleSelectChat(chat.id)}
+                                className={`p-4 border-b border-white/5 cursor-pointer transition-colors hover:bg-white/5 flex gap-3
+                                    ${activeChatId === chat.id ? "bg-white/10" : ""}
+                                    ${chat.unread ? "bg-white/[0.02]" : ""}
+                                `}
+                            >
+                                <div className="relative">
+                                    <Avatar className="w-12 h-12 border border-white/10">
+                                        <AvatarImage src={chat.user.avatar} />
+                                        <AvatarFallback>{chat.user.name[0]?.toUpperCase() || "U"}</AvatarFallback>
+                                    </Avatar>
+                                    {chat.user.platform === 'instagram' && <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 border border-black flex items-center justify-center text-[8px] text-white">IG</div>}
+                                    {chat.user.platform === 'facebook' && <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-600 border border-black flex items-center justify-center text-[8px] text-white">f</div>}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline mb-1">
+                                        <h3 className={`truncate text-sm ${chat.unread ? "font-bold text-white" : "font-medium text-foreground"}`}>{chat.user.name}</h3>
+                                        <span className={`text-xs ${chat.unread ? "text-blue-400 font-bold" : "text-muted-foreground"}`}>{chat.time}</span>
+                                    </div>
+                                    <p className={`truncate text-xs ${chat.unread ? "font-semibold text-white" : "text-muted-foreground"}`}>{chat.lastMessage}</p>
+                                </div>
+                                {chat.unread && <div className="w-2 h-2 mt-2 rounded-full bg-blue-500 shrink-0" />}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 

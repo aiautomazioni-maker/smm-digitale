@@ -23,17 +23,7 @@ export async function GET() {
         const mediaRes = await fetch(mediaUrl, { cache: 'no-store' });
         const mediaData = await mediaRes.json();
 
-        // 3. Format response for the frontend
-        return NextResponse.json({
-            profile: {
-                username: profileData.username,
-                name: profileData.name,
-                followers: profileData.followers_count,
-                media_count: profileData.media_count,
-                profile_picture: profileData.profile_picture_url,
-                biography: profileData.biography
-            },
-            posts: (mediaData.data || []).map((m: any) => ({
+        const posts = (mediaData.data || []).map((m: any) => ({
                 id: m.id,
                 image: m.media_type === 'VIDEO' ? m.thumbnail_url : m.media_url,
                 caption: m.caption,
@@ -46,7 +36,36 @@ export async function GET() {
                 })),
                 timestamp: m.timestamp,
                 permalink: m.permalink
-            }))
+        }));
+
+        // Aggregate recent comments across all posts
+        const allComments: any[] = [];
+        posts.forEach((post: any) => {
+            if (post.commentList) {
+                post.commentList.forEach((c: any) => {
+                    allComments.push({
+                        username: c.user,
+                        text: c.text,
+                        timestamp: post.timestamp // We'll just use post timestamp or parse it if we had precise comment timestamps
+                    });
+                });
+            }
+        });
+
+        const recentComments = allComments.slice(0, 5); // Take first 5 since we fetch posts chronologically
+
+        // 3. Format response for the frontend
+        return NextResponse.json({
+            profile: {
+                username: profileData.username,
+                name: profileData.name,
+                followers: profileData.followers_count,
+                media_count: profileData.media_count,
+                profile_picture: profileData.profile_picture_url,
+                biography: profileData.biography
+            },
+            posts: posts,
+            recent_comments: recentComments // Exported for Dashboard widget
         });
 
     } catch (err: any) {
