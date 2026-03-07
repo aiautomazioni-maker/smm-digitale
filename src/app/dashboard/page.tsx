@@ -159,27 +159,35 @@ export default function DashboardPage() {
                         </Link>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {RECENT_COMMENTS.map((comment) => (
-                            <div key={comment.id} className="flex items-start gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                                <Avatar className="w-10 h-10 border border-white/10">
-                                    <AvatarImage src={comment.user.avatar} />
-                                    <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 space-y-1">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-sm">{comment.user.name}</span>
-                                            <span className="text-xs text-muted-foreground">{comment.user.handle}</span>
-                                        </div>
-                                        <span className="text-xs text-muted-foreground text-right">{comment.time}</span>
-                                    </div>
-                                    <p className="text-sm text-gray-300 line-clamp-2">{comment.text}</p>
-                                </div>
-                                <div className="w-12 h-12 rounded overflow-hidden shrink-0 border border-white/10">
-                                    <img src={comment.postImg} alt="Post" className="w-full h-full object-cover" />
-                                </div>
+                        {tiktokData !== null && tiktokData.videos === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-center">
+                                <MessageCircle className="w-12 h-12 mb-3 opacity-20" />
+                                <p>Nessun commento recente.</p>
+                                <p className="text-xs mt-1">Pubblica il tuo primo video per iniziare a ricevere interazioni!</p>
                             </div>
-                        ))}
+                        ) : (
+                            RECENT_COMMENTS.map((comment) => (
+                                <div key={comment.id} className="flex items-start gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                                    <Avatar className="w-10 h-10 border border-white/10">
+                                        <AvatarImage src={comment.user.avatar} />
+                                        <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-sm">{comment.user.name}</span>
+                                                <span className="text-xs text-muted-foreground">{comment.user.handle}</span>
+                                            </div>
+                                            <span className="text-xs text-muted-foreground text-right">{comment.time}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-300 line-clamp-2">{comment.text}</p>
+                                    </div>
+                                    <div className="w-12 h-12 rounded overflow-hidden shrink-0 border border-white/10">
+                                        <img src={comment.postImg} alt="Post" className="w-full h-full object-cover" />
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </CardContent>
                 </Card>
 

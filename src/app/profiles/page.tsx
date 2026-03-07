@@ -99,7 +99,8 @@ export default function ProfilesPage() {
                 followers: tiktokInfo.followers >= 1000 ? `${(tiktokInfo.followers / 1000).toFixed(1)}K` : tiktokInfo.followers.toString(),
                 likes: tiktokInfo.likes >= 1000 ? `${(tiktokInfo.likes / 1000).toFixed(1)}K` : tiktokInfo.likes.toString(),
                 posts: tiktokInfo.videos.toString()
-            }
+            },
+            ...(tiktokInfo.videos === 0 ? { posts: [] } : {})
         };
     }
 
@@ -437,51 +438,57 @@ export default function ProfilesPage() {
                 </TabsContent>
 
                 <TabsContent value="insights">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium">{t("profiles.reach")}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">+24.5%</div>
-                                <p className="text-xs text-muted-foreground">{t("profiles.reach_desc")}</p>
-                                <div className="h-[100px] w-full mt-4 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-lg flex items-end justify-between px-2 pb-2">
-                                    {[40, 60, 45, 70, 85, 65, 90].map((h, i) => (
-                                        <div key={i} className="w-2 bg-emerald-500 rounded-t" style={{ height: `${h}%` }} />
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium">{t("profiles.interactions")}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">1,240</div>
-                                <p className="text-xs text-muted-foreground">{t("profiles.interactions_desc")}</p>
-                                <div className="h-[100px] w-full mt-4 bg-gradient-to-t from-blue-500/20 to-transparent rounded-lg flex items-end justify-between px-2 pb-2">
-                                    {[30, 45, 35, 50, 60, 40, 75].map((h, i) => (
-                                        <div key={i} className="w-2 bg-blue-500 rounded-t" style={{ height: `${h}%` }} />
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium">{t("profiles.audience")}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">Milano</div>
-                                <p className="text-xs text-muted-foreground">{t("profiles.audience_desc")}</p>
-                                <div className="mt-4 space-y-2">
-                                    <div className="flex justify-between text-xs"><span>{t("profiles.women")}</span> <span>65%</span></div>
-                                    <div className="w-full h-1 bg-muted rounded-full overflow-hidden"><div className="bg-pink-500 h-full w-[65%]" /></div>
-                                    <div className="flex justify-between text-xs"><span>{t("profiles.men")}</span> <span>35%</span></div>
-                                    <div className="w-full h-1 bg-muted rounded-full overflow-hidden"><div className="bg-blue-500 h-full w-[35%]" /></div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    {profile.posts.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-sm font-medium">{t("profiles.reach")}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">+24.5%</div>
+                                    <p className="text-xs text-muted-foreground">{t("profiles.reach_desc")}</p>
+                                    <div className="h-[100px] w-full mt-4 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-lg flex items-end justify-between px-2 pb-2">
+                                        {[40, 60, 45, 70, 85, 65, 90].map((h, i) => (
+                                            <div key={i} className="w-2 bg-emerald-500 rounded-t" style={{ height: `${h}%` }} />
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-sm font-medium">{t("profiles.interactions")}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">1,240</div>
+                                    <p className="text-xs text-muted-foreground">{t("profiles.interactions_desc")}</p>
+                                    <div className="h-[100px] w-full mt-4 bg-gradient-to-t from-blue-500/20 to-transparent rounded-lg flex items-end justify-between px-2 pb-2">
+                                        {[30, 45, 35, 50, 60, 40, 75].map((h, i) => (
+                                            <div key={i} className="w-2 bg-blue-500 rounded-t" style={{ height: `${h}%` }} />
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-sm font-medium">{t("profiles.audience")}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">Milano</div>
+                                    <p className="text-xs text-muted-foreground">{t("profiles.audience_desc")}</p>
+                                    <div className="mt-4 space-y-2">
+                                        <div className="flex justify-between text-xs"><span>{t("profiles.women")}</span> <span>65%</span></div>
+                                        <div className="w-full h-1 bg-muted rounded-full overflow-hidden"><div className="bg-pink-500 h-full w-[65%]" /></div>
+                                        <div className="flex justify-between text-xs"><span>{t("profiles.men")}</span> <span>35%</span></div>
+                                        <div className="w-full h-1 bg-muted rounded-full overflow-hidden"><div className="bg-blue-500 h-full w-[35%]" /></div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 text-muted-foreground border border-white/10 rounded-xl bg-white/5">
+                            Nessun dato statistico disponibile. Inizia a pubblicare per generare insight reali.
+                        </div>
+                    )}
                 </TabsContent>
             </Tabs>
         </div>
