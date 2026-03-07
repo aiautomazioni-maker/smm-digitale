@@ -131,8 +131,8 @@ export function Sidebar() {
                                         TU
                                     </div>
                                     <div className="text-left overflow-hidden">
-                                        <p className="text-sm font-medium text-white truncate">Test User</p>
-                                        <p className="text-xs text-muted-foreground truncate">testuser@example.com</p>
+                                        <p className="text-sm font-medium text-white truncate">Automazioni AI Admin</p>
+                                        <p className="text-xs text-muted-foreground truncate">info@automazioniai.com</p>
                                     </div>
                                     <Settings className="w-4 h-4 ml-auto text-muted-foreground opacity-50" />
                                 </div>

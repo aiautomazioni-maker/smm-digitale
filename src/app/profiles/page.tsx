@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -16,52 +16,16 @@ import { useTranslation } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import { createRepurposePlan, RepurposePlanResponse } from "@/lib/story-engine";
 
-// Mock Profiles Data
-const PROFILES = [
-    {
-        id: "tiktok",
-        name: "Automazioni AI",
-        handle: "@automazioniai",
-        platform: "TikTok",
-        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200",
-        stats: {
-            followers: "0",
-            likes: "0",
-            posts: "0",
-            engagement: "0%"
-        },
-        posts: []
-    },
-    {
-        id: "ig-main",
-        name: "Automazioni AI",
-        handle: "@automazioniai",
-        platform: "Instagram",
-        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200",
-        stats: {
-            followers: "15.7K",
-            following: "890",
-            posts: "156",
-            engagement: "5.2%"
-        },
-        posts: [
-            { id: 1, image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e", likes: 450, comments: 24, commentList: [{ user: "ai_enthusiast", text: "Questa automazione è geniale!", time: "2h" }, { user: "business_pro", text: "Ottimo workflow 🚀", time: "5h" }] },
-            { id: 2, image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5", likes: 320, comments: 15, commentList: [{ user: "growth_hacker", text: "Software rivoluzionario 💎", time: "1g" }] },
-            { id: 3, image: "https://images.unsplash.com/photo-1518770660439-4636190af475", likes: 510, comments: 42, commentList: [{ user: "dev_master", text: "Integrazione perfetta", time: "2g" }] },
-            { id: 4, image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b", likes: 215, comments: 18, commentList: [] },
-            { id: 5, image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1", likes: 180, comments: 8, commentList: [] },
-            { id: 6, image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa", likes: 640, comments: 75, commentList: [] },
-        ]
-    }
-];
-
-import { useEffect } from "react";
 
 export default function ProfilesPage() {
     const { t } = useTranslation();
     const [selectedProfileId, setSelectedProfileId] = useState("tiktok");
     const [selectedPost, setSelectedPost] = useState<any>(null);
-    const [tiktokInfo, setTiktokInfo] = useState<any>(null);
+    const [socialData, setSocialData] = useState<{
+        tiktok: any;
+        instagram: any;
+        loading: boolean;
+    }>({ tiktok: null, instagram: null, loading: true });
 
     // Repurpose Flow States
     const [repurposeMode, setRepurposeMode] = useState<"disabled" | "config" | "loading" | "preview">("disabled");
@@ -72,37 +36,79 @@ export default function ProfilesPage() {
     const [rCtaValue, setRCtaValue] = useState("");
 
     useEffect(() => {
-        async function fetchTikTok() {
+        async function fetchSocial() {
+            setSocialData(prev => ({ ...prev, loading: true }));
             try {
-                const res = await fetch('/api/tiktok/analytics');
-                if (res.ok) {
-                    const data = await res.json();
-                    setTiktokInfo(data);
-                }
+                const [ttRes, igRes] = await Promise.all([
+                    fetch('/api/tiktok/analytics'),
+                    fetch('/api/instagram/analytics')
+                ]);
+
+                let ttData = null;
+                if (ttRes.ok) ttData = await ttRes.json();
+
+                let igData = null;
+                if (igRes.ok) igData = await igRes.json();
+
+                setSocialData({
+                    tiktok: ttData,
+                    instagram: igData,
+                    loading: false
+                });
             } catch (err) {
-                console.error("Failed to load TikTok profile", err);
+                console.error("Failed to load social profiles", err);
+                setSocialData(prev => ({ ...prev, loading: false }));
             }
         }
-        fetchTikTok();
+        fetchSocial();
     }, []);
 
-    let profile: any = PROFILES.find(p => p.id === selectedProfileId) || PROFILES[0];
+    // Construct profile object dynamically based on selectedProfileId
+    let profile: any = {
+        name: "Caricamento...",
+        handle: "@...",
+        platform: selectedProfileId === 'tiktok' ? 'TikTok' : 'Instagram',
+        image: "",
+        stats: { followers: "0", likes: "0", posts: "0", engagement: "0%" },
+        posts: []
+    };
 
-    // Merge real TikTok data if available
-    if (selectedProfileId === 'tiktok' && tiktokInfo) {
+    if (selectedProfileId === 'tiktok' && socialData.tiktok) {
+        const tt = socialData.tiktok;
         profile = {
-            ...profile,
-            name: tiktokInfo.display_name || profile.name,
-            image: tiktokInfo.avatar || profile.image,
+            id: 'tiktok',
+            name: tt.display_name || "Automazioni AI",
+            handle: tt.username ? `@${tt.username}` : "@automazioniai",
+            platform: "TikTok",
+            image: tt.avatar || "",
             stats: {
-                ...profile.stats,
-                followers: tiktokInfo.followers >= 1000 ? `${(tiktokInfo.followers / 1000).toFixed(1)}K` : tiktokInfo.followers.toString(),
-                likes: tiktokInfo.likes >= 1000 ? `${(tiktokInfo.likes / 1000).toFixed(1)}K` : tiktokInfo.likes.toString(),
-                posts: tiktokInfo.videos.toString()
+                followers: tt.followers >= 1000 ? `${(tt.followers / 1000).toFixed(1)}K` : tt.followers.toString(),
+                likes: tt.likes >= 1000 ? `${(tt.likes / 1000).toFixed(1)}K` : tt.likes.toString(),
+                posts: tt.videos?.toString() || "0",
+                engagement: "N/A"
             },
-            ...(tiktokInfo.videos === 0 ? { posts: [] } : {})
+            posts: [] // TikTok media not implemented yet in analytics endpoint
+        };
+    } else if (selectedProfileId === 'ig-main' && socialData.instagram) {
+        const ig = socialData.instagram;
+        profile = {
+            id: 'ig-main',
+            name: ig.profile.name || "Automazioni AI",
+            handle: `@${ig.profile.username}` || "@aiautomazioni",
+            platform: "Instagram",
+            image: ig.profile.profile_picture || "",
+            stats: {
+                followers: ig.profile.followers >= 1000 ? `${(ig.profile.followers / 1000).toFixed(1)}K` : ig.profile.followers.toString(),
+                posts: ig.profile.media_count.toString(),
+                likes: "N/A", // Aggregated likes need complex calculation
+                following: "N/A",
+                engagement: "N/A"
+            },
+            posts: ig.posts || [],
+            biography: ig.profile.biography
         };
     }
+
 
     const resetRepurpose = () => {
         setRepurposeMode("disabled");
@@ -137,9 +143,8 @@ export default function ProfilesPage() {
                         <SelectValue placeholder={t("profiles.select")} />
                     </SelectTrigger>
                     <SelectContent>
-                        {PROFILES.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.platform}: {p.name}</SelectItem>
-                        ))}
+                        <SelectItem value="tiktok">TikTok: {socialData.tiktok?.display_name || "Automazioni AI"}</SelectItem>
+                        <SelectItem value="ig-main">Instagram: {socialData.instagram?.profile.name || "Automazioni AI"}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -182,10 +187,14 @@ export default function ProfilesPage() {
 
                             <div className="max-w-md">
                                 <p className="font-semibold">{profile.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    🤖 AI Automation Agency <br />
-                                    🌐 Scaliamo il tuo business con l'Intelligenza Artificiale <br />
-                                    👇 Prenota una consulenza gratuita
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                    {profile.biography || (
+                                        <>
+                                            🤖 AI Automation Agency <br />
+                                            🌐 Scaliamo il tuo business con l'Intelligenza Artificiale <br />
+                                            👇 Prenota una consulenza gratuita
+                                        </>
+                                    )}
                                 </p>
                                 <a href="https://automazioniai.com" className="text-blue-400 text-sm hover:underline">automazioniai.com</a>
                             </div>
@@ -440,46 +449,39 @@ export default function ProfilesPage() {
                 <TabsContent value="insights">
                     {profile.posts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card>
+                            <Card className="bg-white/5 border-white/10">
                                 <CardHeader>
                                     <CardTitle className="text-sm font-medium">{t("profiles.reach")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">+24.5%</div>
-                                    <p className="text-xs text-muted-foreground">{t("profiles.reach_desc")}</p>
-                                    <div className="h-[100px] w-full mt-4 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-lg flex items-end justify-between px-2 pb-2">
-                                        {[40, 60, 45, 70, 85, 65, 90].map((h, i) => (
-                                            <div key={i} className="w-2 bg-emerald-500 rounded-t" style={{ height: `${h}%` }} />
-                                        ))}
+                                    <div className="text-2xl font-bold">--</div>
+                                    <p className="text-xs text-muted-foreground">In attesa di dati storici</p>
+                                    <div className="h-[100px] w-full mt-4 bg-muted/20 rounded-lg flex items-center justify-center">
+                                        <p className="text-[10px] text-muted-foreground italic">Calcolo trend in corso...</p>
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card>
+                            <Card className="bg-white/5 border-white/10">
                                 <CardHeader>
                                     <CardTitle className="text-sm font-medium">{t("profiles.interactions")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">1,240</div>
-                                    <p className="text-xs text-muted-foreground">{t("profiles.interactions_desc")}</p>
-                                    <div className="h-[100px] w-full mt-4 bg-gradient-to-t from-blue-500/20 to-transparent rounded-lg flex items-end justify-between px-2 pb-2">
-                                        {[30, 45, 35, 50, 60, 40, 75].map((h, i) => (
-                                            <div key={i} className="w-2 bg-blue-500 rounded-t" style={{ height: `${h}%` }} />
-                                        ))}
+                                    <div className="text-2xl font-bold">--</div>
+                                    <p className="text-xs text-muted-foreground">Analisi interazioni attive</p>
+                                    <div className="h-[100px] w-full mt-4 bg-muted/20 rounded-lg flex items-center justify-center">
+                                        <p className="text-[10px] text-muted-foreground italic">Dati non ancora sufficienti</p>
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card>
+                            <Card className="bg-white/5 border-white/10">
                                 <CardHeader>
                                     <CardTitle className="text-sm font-medium">{t("profiles.audience")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">Milano</div>
-                                    <p className="text-xs text-muted-foreground">{t("profiles.audience_desc")}</p>
+                                    <div className="text-2xl font-bold">--</div>
+                                    <p className="text-xs text-muted-foreground">Demografia follower</p>
                                     <div className="mt-4 space-y-2">
-                                        <div className="flex justify-between text-xs"><span>{t("profiles.women")}</span> <span>65%</span></div>
-                                        <div className="w-full h-1 bg-muted rounded-full overflow-hidden"><div className="bg-pink-500 h-full w-[65%]" /></div>
-                                        <div className="flex justify-between text-xs"><span>{t("profiles.men")}</span> <span>35%</span></div>
-                                        <div className="w-full h-1 bg-muted rounded-full overflow-hidden"><div className="bg-blue-500 h-full w-[35%]" /></div>
+                                        <p className="text-[10px] text-muted-foreground text-center py-4 italic">Collega account professional per insight demografici</p>
                                     </div>
                                 </CardContent>
                             </Card>

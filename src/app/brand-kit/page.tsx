@@ -80,15 +80,15 @@ export default function BrandKitPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>{t("brand_kit.form.name")}</Label>
-                                    <Input placeholder="Es. Pizzeria Bella Napoli" value={input.business_name} onChange={e => setInput({ ...input, business_name: e.target.value })} className="bg-white/5 border-white/10" />
+                                    <Input placeholder="Es. Automazioni AI" value={input.business_name} onChange={e => setInput({ ...input, business_name: e.target.value })} className="bg-white/5 border-white/10" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t("brand_kit.form.industry")}</Label>
-                                    <Input placeholder="Es. Ristorazione / Food" value={input.industry} onChange={e => setInput({ ...input, industry: e.target.value })} className="bg-white/5 border-white/10" />
+                                    <Input placeholder="Es. Marketing / AI / Agenzia" value={input.industry} onChange={e => setInput({ ...input, industry: e.target.value })} className="bg-white/5 border-white/10" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t("brand_kit.form.city")}</Label>
-                                    <Input placeholder="Es. Napoli" value={input.city} onChange={e => setInput({ ...input, city: e.target.value })} className="bg-white/5 border-white/10" />
+                                    <Input placeholder="Es. Milano / Global" value={input.city} onChange={e => setInput({ ...input, city: e.target.value })} className="bg-white/5 border-white/10" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t("brand_kit.form.website")}</Label>
@@ -98,7 +98,7 @@ export default function BrandKitPage() {
 
                             <div className="space-y-2">
                                 <Label>{t("brand_kit.form.target")}</Label>
-                                <Textarea placeholder="Chi sono i tuoi clienti ideali? Es. Famiglie, professionisti in pausa pranzo..." value={input.target_audience} onChange={e => setInput({ ...input, target_audience: e.target.value })} className="bg-white/5 border-white/10" />
+                                <Textarea placeholder="Chi sono i tuoi clienti ideali? Es. Aziende tech, Liberi professionisti, E-commerce..." value={input.target_audience} onChange={e => setInput({ ...input, target_audience: e.target.value })} className="bg-white/5 border-white/10" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,7 +118,7 @@ export default function BrandKitPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>{t("brand_kit.form.offer")}</Label>
-                                    <Input placeholder="Es. Pizza verace a lunga lievitazione" value={input.offer} onChange={e => setInput({ ...input, offer: e.target.value })} className="bg-white/5 border-white/10" />
+                                    <Input placeholder="Es. Gestione social automatizzata con AI" value={input.offer} onChange={e => setInput({ ...input, offer: e.target.value })} className="bg-white/5 border-white/10" />
                                 </div>
                             </div>
 

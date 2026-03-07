@@ -33,33 +33,33 @@ type Mode = "generate" | "upload" | "template";
 
 // MOCK BRAND KIT (In a real app, this comes from context/db)
 const MOCK_BRAND_KIT: BrandKit = {
-    brand_name: "SMM Digitale",
-    tagline: "Marketing del futuro",
-    tone_of_voice: ["Friendly", "Professional", "Innovative", "Smart"],
-    writing_rules: ["Usa emoji moderate", "Sii conciso", "Focus sui risultati"],
-    do_not_say: ["Economico", "Vecchio", "Lento", "Sconto"],
-    value_props: ["Automazione AI", "Crescita rapida", "Risparmio di tempo"],
+    brand_name: "Automazioni AI",
+    tagline: "L'agenzia di marketing potenziata dall'Intelligenza Artificiale",
+    tone_of_voice: ["Innovativo", "Efficace", "Visionario", "Diretto"],
+    writing_rules: ["Focus sui risultati", "Semplifica la tecnologia", "Sii d'ispirazione"],
+    do_not_say: ["Manuale", "Vecchio stampo", "Costoso"],
+    value_props: ["Automazione totale", "Creatività AI", "Performance scalabile"],
     audience_personas: [
         {
-            name: "Marco Marketer",
-            age_range: "25-40",
-            goals: ["Scalare l'agenzia", "Risparmiare tempo"],
-            pain_points: ["Troppo lavoro manuale", "Creatività bloccata"],
-            objections: ["L'AI è impersonale"]
+            name: "Imprenditore Digitale",
+            age_range: "30-50",
+            goals: ["Scalare il business", "Delegare i contenuti"],
+            pain_points: ["Mancanza di tempo", "Costi agenzie tradizionali"],
+            objections: ["Controllo della qualità"]
         }
     ],
     visual_direction: {
-        style_keywords: ["Modern", "Tech", "Minimal"],
+        style_keywords: ["Futuristico", "Premium", "Dark Mode"],
         color_palette: [
-            { name: "Primary", hex: "#8b5cf6" },
-            { name: "Secondary", hex: "#ec4899" }
+            { name: "Primary", hex: "#a855f7" },
+            { name: "Secondary", hex: "#000000" }
         ],
-        photo_style: ["High Contrast", "Neon"],
-        video_style: ["Fast paced"],
-        composition_rules: ["Centered"]
+        photo_style: ["Cinematico", "High Tech"],
+        video_style: ["Dinamico"],
+        composition_rules: ["Pulito"]
     },
-    cta_preferences: ["Scrivici in DM", "Link in Bio", "Salva il post"],
-    brand_hashtags: ["#smmdigitale", "#marketingai", "#growth"]
+    cta_preferences: ["Prenota una demo", "Inizia ora", "Scopri l'AI"],
+    brand_hashtags: ["#automazioniai", "#aimarketing", "#innovation"]
 };
 
 function NewPostWizardInner() {
@@ -130,7 +130,7 @@ function NewPostWizardInner() {
             const apiEndpoint = brief.is_sequence ? '/api/agent/multi-story-plan' : '/api/agent/story-plan';
             const payload = {
                 lang: "it",
-                workspace_id: "demo_ws_123",
+                workspace_id: "automazioni_ai_prod",
                 brand_kit: MOCK_BRAND_KIT,
                 ...(brief.is_sequence ? { sequence_settings: brief } : { story_brief: brief }),
                 source: {
@@ -206,22 +206,20 @@ function NewPostWizardInner() {
                 method: 'POST',
                 body: JSON.stringify({
                     lang: "it",
-                    workspace_id: "demo_ws_123",
-                    brand_kit: MOCK_BRAND_KIT,
-                    source_post: sourcePost,
-                    repurpose_settings: {
-                        frames_count: 3,
-                        keep_original_visual_style: true,
-                        cta_type: "link",
-                        cta_value: "https://smmdigitale.ai",
-                        tone: "Professional"
-                    },
-                    capabilities: {
-                        can_publish_story: false,
-                        supports_link_sticker: true,
-                        supports_interactive_stickers: true
-                    },
-                    schedule: { publish_at_iso: new Date().toISOString() }
+                    workspace_id: "automazioni_ai_prod",
+                    project_title: "Automazioni AI - Story Project",
+                    goal: "Engagement",
+                    concept: "Story generata dal sistema",
+                    style_keywords: ["dynamic"],
+                    platform_targets: ["facebook_stories", "instagram_stories"],
+                    specs: { aspect_ratio: "9:16", width: 1080, height: 1920, fps: 30, duration_sec: 15, max_duration_sec: 60, safe_zone: { top_px: 250, bottom_px: 420 } },
+                    script: { hook_text: "Guarda questo", voiceover_text: "Benvenuti", on_screen_text: ["Highlight"], cta_text: "Scopri di più" },
+                    storyboard: { scenes: [{ scene_index: 1, duration_sec: 15, visual_description: "Scene", camera_motion: "static", overlay_text: null, broll_needed: "none" }] },
+                    generation_plan: { mode: "text_to_video", prompt_en: "preview", negative_prompt_en: "", inputs: { seed_media_urls: [], use_brand_palette: true }, specs: { aspect_ratio: "9:16", width: 1080, height: 1920, fps: 30, duration_sec: 15 } },
+                    editor_edl: { timeline: { duration_sec: 15, segments: [{ start_sec: 0, end_sec: 15, speed: 1.0, transition_to_next: "cut" }] }, filters: [{ name: "clean", intensity: 0.25 }], enhancement: { denoise: 0.2, sharpen: 0.15, stabilize: false, upscale: false }, text_overlays: [], subtitles: { enabled: true, mode: "phrase", burn_in: true, style: "clean", max_chars_per_line: 28, position_zone: "center" }, audio: { music_enabled: true, music_mode: "safe_library", music_keywords: ["upbeat"], ducking: true, ducking_level: "medium", manual_steps: [] } },
+                    copy: { caption: "New Story #AutomazioniAI", cta: "Link in bio", hashtags: ["#automazioniai"], emoji_level: "medium" },
+                    publish_jobs: ["facebook_stories", "instagram_stories"].map((t: string) => ({ platform: t, content_type: "story", media_url: null, cover_url: null, caption: "Automazioni AI Story", hashtags: [], publish_at_iso: null, timezone: "Europe/Rome", requires_manual_publish: false, manual_steps: [] })),
+                    warnings: ["Generazione Story Attiva"]
                 })
             });
             const plan = await res.json();
@@ -378,7 +376,7 @@ function NewPostWizardInner() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     platform: selectedPlatform,
-                    workspace_id: "demo_ws_123",
+                    workspace_id: "automazioni_ai_prod",
                     lang: "it",
                     post: {
                         content_type: format,
@@ -393,7 +391,7 @@ function NewPostWizardInner() {
                 const isSimulated = data.simulated ? "(SIMULATO)" : "";
                 toast.success(`Post pubblicato con successo su ${selectedPlatform}! ${isSimulated}`);
                 setIsPublished(true);
-                setPublishedPostId(data.postId || "mock-id-123");
+                setPublishedPostId(data.postId || `api_${Date.now()}`);
             } else {
                 toast.error("Errore di pubblicazione: " + data.error);
             }

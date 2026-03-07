@@ -1,16 +1,23 @@
 import { EditorialPlan, PlanInput, PlanItem } from "@/types/calendar";
 import { BrandKit } from "@/types/brand";
 
-// Mock Data
-const MOCK_PILLARS = ["Educazione", "Intrattenimento", "Vendita", "Dietro le Quinte"];
 
 export async function generateEditorialPlan(input: PlanInput, brandKit: BrandKit | null): Promise<EditorialPlan> {
+    if (!brandKit) {
+        return {
+            strategy: { focus_of_the_cycle: "Configura il Brand Kit per generare un piano.", pillars_breakdown: [] },
+            items: [],
+            warnings: ["Manca la configurazione del Brand Kit"]
+        };
+    }
+
     // Simulate AI Gen Delay
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    const brandName = brandKit?.brand_name || "Tuo Brand";
-    const tone = brandKit?.tone_of_voice[0] || "Professionale";
-    const colors = brandKit?.visual_direction.color_palette.map(c => c.name).join(", ") || "Colori Brand";
+    const brandName = brandKit.brand_name || "Automazioni AI";
+    const tone = brandKit.tone_of_voice?.[0] || "Professionale";
+    const colors = brandKit.visual_direction?.color_palette?.map(c => c.name).join(", ") || "Colori Brand";
+    const activePillars = brandKit.visual_direction?.style_keywords || ["Automatizazione", "AI Business"];
 
     // Generate 14 days
     const items: PlanItem[] = [];
@@ -19,7 +26,7 @@ export async function generateEditorialPlan(input: PlanInput, brandKit: BrandKit
     for (let i = 1; i <= 14; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + (i - 1));
-        // Simple logic to mix types based on frequency (mock)
+
         const typeRoll = Math.random();
         let type: "post" | "reel" | "story" | "carousel" = "post";
 
@@ -27,38 +34,36 @@ export async function generateEditorialPlan(input: PlanInput, brandKit: BrandKit
         else if (typeRoll > 0.4) type = "story";
         else if (typeRoll > 0.2) type = "carousel";
 
-        const pillar = MOCK_PILLARS[Math.floor(Math.random() * MOCK_PILLARS.length)];
+        const pillar = activePillars[Math.floor(Math.random() * activePillars.length)];
 
         // Context-aware prompts
-        const visualPrompt = `Foto ${tone.toLowerCase()} per ${brandName}, stile ${brandKit?.visual_direction.photo_style[0] || "moderno"}, colori ${colors}. Soggetto: ${pillar} relativo al settore ${brandKit?.visual_direction.style_keywords[0] || "generico"}.`;
+        const visualPrompt = `Foto ${tone.toLowerCase()} per ${brandName}, stile ${brandKit.visual_direction?.photo_style?.[0] || "moderno"}, colori ${colors}. Soggetto: ${pillar}.`;
 
         const hook = type === "reel"
-            ? "POV: Quando scopri che..."
-            : "3 Cose che non sai su...";
+            ? "POV: Come Automazioni AI rivoluziona..."
+            : "Come scalare con l'AI...";
 
         items.push({
             id: `plan-${i}-${Date.now()}`,
             day_index: i,
             date: currentDate.toISOString(),
-            channels: ["instagram"], // Default for MVP
+            channels: ["instagram"],
             content_type: type,
             pillar: pillar,
-            topic: `Topic day ${i} - ${pillar}`,
+            topic: `${pillar} - Day ${i}`,
             hook_text: hook,
-            caption_brief: `Scrivi una caption ${tone} su ${pillar}. Focus su: ${input.goals}. Usa emoji.`,
+            caption_brief: `Scrivi una caption ${tone} su ${pillar}. Focus su: ${input.goals}.`,
             visual_prompt: visualPrompt,
-            cta: brandKit?.cta_preferences[0] || "Scopri di più",
+            cta: brandKit.cta_preferences?.[0] || "Scopri di più",
             estimated_effort: type === "reel" ? "high" : "medium",
             status: "planned"
         });
-
-        // Dates are handled at top of loop
     }
 
     return {
         strategy: {
-            focus_of_the_cycle: `Crescita e Engagement per raggiungere l'obiettivo: ${input.goals}`,
-            pillars_breakdown: MOCK_PILLARS.map(p => ({ pillar: p, percentage: 25 }))
+            focus_of_the_cycle: `Strategia per: ${input.goals}`,
+            pillars_breakdown: activePillars.map(p => ({ pillar: p, percentage: Math.floor(100 / activePillars.length) }))
         },
         items,
         warnings: []
@@ -66,16 +71,7 @@ export async function generateEditorialPlan(input: PlanInput, brandKit: BrandKit
 }
 
 export async function getDashboardPreview(): Promise<PlanItem[]> {
-    // Generate a quick 3-day preview without delay
-    const input: PlanInput = {
-        start_date: new Date(),
-        goals: "Preview",
-        frequency: { posts: 7, stories: 7, reels: 7 }
-    };
-
-    // Simulate fetching from DB
-    const plan = await generateEditorialPlan(input, null);
-
-    // Return first 3 items
-    return plan.items.slice(0, 3);
+    // Return empty by default as requested (no fake preview)
+    return [];
 }
+

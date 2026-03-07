@@ -1,0 +1,128 @@
+# 💰 SMM Digitale — Piano Costi & Pricing
+
+## 1. Costi Fissi Infrastruttura (mensili)
+
+| Servizio | Piano | Costo/mese |
+|---|---|---|
+| **Vercel** | Pro (necessario per serverless functions > 10s + CDN) | €20/mese |
+| **Supabase** | Pro (necessario per DB + storage video) | $25/mese (~€23) |
+| **OpenAI** | Pay-as-you-go | variabile |
+| **Totale Fisso** | | **~€43/mese** |
+
+> ⚠️ Con meno di ~5 utenti paganti Starter potete usare Vercel Hobby (gratuito) + Supabase Free. Scalate al Pro quando il volume lo richiede.
+
+---
+
+## 2. Costi per Azione AI (per singola chiamata)
+
+### OpenAI — Prezzi ufficiali (Febbraio 2026)
+
+| Modello | Input (1M token) | Output (1M token) |
+|---|---|---|
+| `gpt-4o` | $2.50 | $10.00 |
+| `gpt-4o-mini` | $0.15 | $0.60 |
+| `dall-e-3` Standard 1024x1024 | — | **$0.04 / immagine** |
+| `dall-e-3` Standard 1024x1792 | — | **$0.08 / immagine** |
+
+---
+
+### Costo Per Azione Utente
+
+| Azione | Endpoint | Modello | Token stimati | Costo OpenAI |
+|---|---|---|---|---|
+| **Genera Immagine Post** | `generate-image` | dall-e-3 | — | **$0.04** |
+| **Genera Immagine Story 9:16** | `generate-image` | dall-e-3 1024x1792 | — | **$0.08** |
+| **Genera Caption** | `generate-caption` | gpt-4o-mini | ~2.000 | **$0.0006** |
+| **Ottimizza Caption** | `optimize-post-caption` | gpt-4o | ~3.000 | **$0.038** |
+| **Analisi Immagine** | `analyze-image` | gpt-4o (vision) | ~2.000 | **$0.025** |
+| **Punteggio Pre-Publicazione** | `build-prepublish-scorecard` | gpt-4o-mini | ~3.000 | **$0.0009** |
+| **Predici Performance Post** | `predict-post-performance` | gpt-4o | ~4.000 | **$0.05** |
+| **Suggerisci Miglioramenti** | `suggest-visual-improvements` | gpt-4o | ~3.000 | **$0.038** |
+| **Story Plan (1 story)** | `story-plan` | gpt-4o | ~5.000 | **$0.063** |
+| **Multi Story Plan** | `multi-story-plan` | gpt-4o | ~7.000 | **$0.088** |
+| **Story Repurpose** | `story-repurpose` | gpt-4o | ~5.000 | **$0.063** |
+| **Analisi Trend** | `get-trends` | — (mock) | — | **$0** |
+| **Video Plan Completo** | `create-full-video-plan` | gpt-4o | ~8.000 | **$0.10** |
+| **Script & Storyboard Video** | `build-video-script-storyboard` | gpt-4o-mini | ~5.000 | **$0.0033** |
+| **Sottotitoli Video** | `generate-video-subtitles` | gpt-4o-mini | ~4.000 | **$0.003** |
+| **Metadata Video** | `generate-video-metadata` | gpt-4o-mini | ~2.000 | **$0.0009** |
+| **Cover Options** | `generate-cover-options` | gpt-4o-mini | ~3.000 | **$0.0012** |
+| **Predici Perf. Video** | `predict-video-performance` | gpt-4o | ~5.000 | **$0.063** |
+| **Ottimizzazione Schedule** | `schedule-optimization` | — (logic) | — | **$0** |
+| **Musica AI** | `select-music-plan` | gpt-4o-mini | ~2.000 | **$0.0006** |
+| **Performance Card** | `build-performance-card` | gpt-4o-mini | ~3.000 | **$0.0012** |
+
+---
+
+### 💡 Costo Flussi Completi (utente medio per sessione)
+
+| Flusso | Azioni incluse | Costo OpenAI |
+|---|---|---|
+| **"Crea Post Completo"** | Genera immagine + Caption + Analisi + Scorecard | **~$0.09** |
+| **"Crea Story AI"** | Immagine 9:16 + Story Plan + Repurpose | **~$0.20** |
+| **"Crea Video AI"** | Full Video Plan + Script + Metadata + Sottotitoli + Cover | **~$0.12** |
+| **"Analisi Post Esistente"** | Analisi immagine + Ottimizza caption + Predici perf | **~$0.11** |
+
+---
+
+## 3. Analisi Margini Per Piano
+
+> **Assunzione:** Utente attivo fa in media 3 sessioni complete/settimana = ~12-15 sessioni/mese
+
+| Piano | Prezzo/mese | Crediti | Azioni stimate/mese | Costo OpenAI stim. | Costo Infra procapite | **Margine Lordo** |
+|---|---|---|---|---|---|---|
+| **Micro** €19 | 80 crediti | ~30 azioni | ~$2.70 (~€2.5) | €0.80 | **€15.7 (83%)** |
+| **Starter** €49 | 250 crediti | ~90 azioni | ~$8.00 (~€7.5) | €1.40 | **€40.1 (82%)** |
+| **Pro** €99 | 600 crediti | ~200 azioni | ~$20 (~€18.5) | €2.50 | **€78 (79%)** |
+| **Business** €249 | 1.800 crediti | ~600 azioni | ~$55 (~€51) | €4.50 | **€193.5 (78%)** |
+| **Empire** €499 | 4.500 crediti | ~1.500 azioni | ~$135 (~€125) | €6.50 | **€367.5 (74%)** |
+
+> Il costo infra pro-capite è €43 / numero totale utenti attivi. Più utenti = meno incide.
+
+---
+
+## 4. Break-even e Profittabilità
+
+| Scenario | Utenti | Ricavi/mese | Costi Totali | **Utile Netto** |
+|---|---|---|---|---|
+| Solo infrastruttura | 0 | €0 | €43 | **-€43** |
+| BEP assoluto | 3 utenti Starter | €147 | €43+€22 | **+€82** |
+| Piccola crescita | 10 Starter + 3 Pro | €787 | ~€190 | **~€600** |
+| Scala | 50 Starter + 20 Pro + 5 Business | ~€5.700 | ~€1.500 | **~€4.200/mese** |
+
+---
+
+## 5. 🚨 Raccomandazioni Pricing
+
+### I prezzi attuali sono corretti ma con questi accorgimenti:
+
+1. **Micro (€19)** → ✅ Principale piano di acquisizione. Non abbassarlo.
+2. **Starter (€49)** → ✅ Piano più venduto stimato. Il "popular" giusto.
+3. **Pro (€99)** → ⚠️ Aggiungi funzionalità esclusive (Video AI completo, Analisi Trend reale) per giustificare il salto da €49.
+4. **Business (€249)** → ⚠️ Multi-utente ancora da implementare. Considera di posizionarlo come "agenzia" con white-label.
+5. **Empire (€499)** → Low-volume / high-value. Ottimo margine.
+
+### Pricing alternativo (più aggressivo per crescita):
+- Micro →  **€9/mese** (porta il tasso di conversione su)
+- Starter → **€29/mese**  
+- Pro → **€79/mese**
+- Business → **€199/mese**
+- Empire → **€449/mese**
+
+> Con questi prezzi il margine rimane sopra il 70% e la barriera d'ingresso si abbassa, aumentando il volume di utenti.
+
+---
+
+## 6. Costi Aggiuntivi Futuri (non ancora attivi)
+
+| Servizio | Scopo | Costo stimato |
+|---|---|---|
+| **HeyGen** | Avatar video AI (Avatar Chat) | $29+/mese o $0.25/min video |
+| **FFmpeg Cloud** (Cloudflare Workers / AWS Lambda) | Video generation reale | $0.001-0.01/video |
+| **Stripe** | Payment processing | 1.4% + €0.25 per transazione (EU) |
+| **Resend** (email) | Email verifica/notifiche | Gratis fino a 3.000/mese |
+
+### Stripe (già nel codice, non ancora live):
+- Su **€49 Starter**: Stripe prende **~€0.94**
+- Su **€99 Pro**: Stripe prende **~€1.64**
+- Su **€249 Business**: Stripe prende **~€3.74**

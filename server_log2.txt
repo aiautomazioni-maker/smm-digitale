@@ -1,0 +1,30 @@
+
+> smm-digitale@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.53:3000
+- Environments: .env.local, .env
+
+✓ Starting...
+✓ Ready in 1379ms
+[UPLOAD_URL] Supabase sign error: Error [StorageUnknownError]: fetch failed
+    at ignore-listed frames {
+  __isStorageError: true,
+  namespace: 'storage',
+  status: undefined,
+  statusCode: undefined,
+  originalError: TypeError: fetch failed
+      at ignore-listed frames {
+    [cause]: Error: getaddrinfo ENOTFOUND bxpjnkuhumritttbjck.supabase.co
+        at ignore-listed frames {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'bxpjnkuhumritttbjck.supabase.co'
+    }
+  }
+}
+ POST /api/storage/upload-video 500 in 525ms (compile: 278ms, render: 248ms)
+  Reload env: .env.local
