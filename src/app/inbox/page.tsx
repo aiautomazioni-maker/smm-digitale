@@ -24,42 +24,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-// Dati Mockati per le Chat
-const MOCK_CHATS = [
-    {
-        id: "chat-1",
-        user: { name: "Marco Rossi", handle: "@marcorossi", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d", platform: "instagram" },
-        lastMessage: "Potete integrare ChatGPT nel mio CRM?",
-        time: "10:42",
-        unread: true,
-        messages: [
-            { id: 1, text: "Ciao! Ho visto il vostro ultimo video sulle automazioni CRM.", sender: "user", time: "10:40" },
-            { id: 2, text: "Potete integrare ChatGPT nel mio CRM Salesforce?", sender: "user", time: "10:42" }
-        ]
-    },
-    {
-        id: "chat-2",
-        user: { name: "Giulia Bianchi", handle: "Giulia Bianchi", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", platform: "facebook" },
-        lastMessage: "Grazie mille per le informazioni!",
-        time: "Ieri",
-        unread: false,
-        messages: [
-            { id: 1, text: "Salve, create anche chatbot per la gestione appuntamenti?", sender: "user", time: "Ieri 15:30" },
-            { id: 2, text: "Certamente! Abbiamo sistemi AI che si collegano direttamente a Google Calendar o Calendly.", sender: "me", time: "Ieri 16:00" },
-            { id: 3, text: "Grazie mille per le informazioni!", sender: "user", time: "Ieri 16:05" }
-        ]
-    },
-    {
-        id: "chat-3",
-        user: { name: "Tech Advisor Italy", handle: "@techadvisor_it", avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d", platform: "instagram" },
-        lastMessage: "Sarebbe fantastico collaborare sulle nuove soluzioni AI per PMI.",
-        time: "Lun",
-        unread: false,
-        messages: [
-            { id: 1, text: "Complimenti per i vostri contenuti! Sarebbe fantastico collaborare sulle nuove soluzioni AI per PMI.", sender: "user", time: "Lun 09:15" }
-        ]
-    }
-];
+// Dati Iniziali (Vuoti in attesa di fetch reale)
+const MOCK_CHATS: any[] = [];
 
 export default function InboxPage() {
     const { t } = useTranslation();
@@ -210,7 +176,7 @@ export default function InboxPage() {
 
                         {/* Messages Area */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                            {activeChat.messages.map((msg, idx) => {
+                            {activeChat.messages.map((msg: any, idx: number) => {
                                 const isMe = msg.sender === "me";
                                 return (
                                     <div key={idx} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
