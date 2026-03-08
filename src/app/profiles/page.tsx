@@ -96,7 +96,8 @@ export default function ProfilesPage() {
         instagram: any;
         facebook: any;
         loading: boolean;
-    }>({ tiktok: null, instagram: null, facebook: null, loading: true });
+        tiktokNeedsReconnect: boolean;
+    }>({ tiktok: null, instagram: null, facebook: null, loading: true, tiktokNeedsReconnect: false });
 
     // Repurpose Flow States
     const [repurposeMode, setRepurposeMode] = useState<"disabled" | "config" | "loading" | "preview">("disabled");
@@ -117,7 +118,16 @@ export default function ProfilesPage() {
                 ]);
 
                 let ttData = null;
-                if (ttRes.ok) ttData = await ttRes.json();
+                let tiktokNeedsReconnect = false;
+                if (ttRes.ok) {
+                    ttData = await ttRes.json();
+                    if (ttData?.needsReconnect) {
+                        tiktokNeedsReconnect = true;
+                        ttData = null;
+                    }
+                } else if (ttRes.status === 401) {
+                    tiktokNeedsReconnect = true;
+                }
 
                 let igData = null;
                 if (igRes.ok) igData = await igRes.json();
@@ -129,7 +139,8 @@ export default function ProfilesPage() {
                     tiktok: ttData,
                     instagram: igData,
                     facebook: fbData,
-                    loading: false
+                    loading: false,
+                    tiktokNeedsReconnect
                 });
             } catch (err) {
                 console.error("Failed to load social profiles", err);
@@ -226,6 +237,18 @@ export default function ProfilesPage() {
 
     return (
         <div className="space-y-8">
+            {/* TikTok Reconnect Banner */}
+            {selectedProfileId === 'tiktok' && socialData.tiktokNeedsReconnect && (
+                <div className="bg-gradient-to-r from-pink-500/20 to-teal-400/20 border border-pink-500/30 rounded-xl p-4 flex items-center justify-between gap-4">
+                    <div>
+                        <p className="font-semibold text-sm">🔗 TikTok non connesso o token scaduto</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Il token scade ogni 24 ore. Il sistema prova a rinnovarlo automaticamente, ma se il refresh fallisce devi riconnetterti.</p>
+                    </div>
+                    <a href="/api/auth/tiktok/login" className="shrink-0 bg-gradient-to-r from-pink-500 to-teal-400 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                        Riconnetti TikTok
+                    </a>
+                </div>
+            )}
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{t("profiles.title")}</h1>
