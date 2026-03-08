@@ -6,7 +6,8 @@ export async function GET(req: Request) {
     const clientKey = process.env.TIKTOK_CLIENT_KEY;
     const url = new URL(req.url);
     const origin = `${url.protocol}//${url.host}`;
-    const redirectUri = `${origin}/api/auth/tiktok/callback`;
+    // Use exact URI from .env if present (to exactly match portal), otherwise fallback
+    const redirectUri = process.env.TIKTOK_REDIRECT_URI || `${origin}/api/auth/tiktok/callback`;
 
     if (!clientKey) {
         return NextResponse.json({ error: 'TikTok configuration missing' }, { status: 500 });

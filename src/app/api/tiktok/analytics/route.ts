@@ -44,7 +44,7 @@ async function tryRefreshToken(supabase: any, refreshToken: string, profileId?: 
                 tiktok_access_token: newAccessToken,
                 tiktok_refresh_token: newRefreshToken,
                 tiktok_token_expires_at: expiresAt,
-            }).eq('id', profileId);
+            }).eq('user_id', profileId);
             console.log('[TIKTOK] Updated token in Supabase for profile:', profileId);
         } else {
             // Update latest profile if we don't know which user
@@ -84,14 +84,14 @@ export async function GET() {
 
             const { data: profiles } = await supabase
                 .from('profiles')
-                .select('id, tiktok_access_token, tiktok_refresh_token, tiktok_token_expires_at')
+                .select('user_id, tiktok_access_token, tiktok_refresh_token, tiktok_token_expires_at')
                 .not('tiktok_access_token', 'is', null)
                 .order('tiktok_token_expires_at', { ascending: false })
                 .limit(1);
 
             if (profiles && profiles.length > 0) {
                 const profile = profiles[0];
-                profileId = profile.id;
+                profileId = profile.user_id;
                 refreshToken = profile.tiktok_refresh_token;
 
                 // Check if token is expired

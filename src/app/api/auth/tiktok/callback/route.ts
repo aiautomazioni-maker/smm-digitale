@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 
     const url = new URL(req.url);
     const origin = `${url.protocol}//${url.host}`;
-    const redirectUri = `${origin}/api/auth/tiktok/callback`;
+    const redirectUri = process.env.TIKTOK_REDIRECT_URI || `${origin}/api/auth/tiktok/callback`;
 
     try {
         // Exchange code for Access Token
@@ -83,7 +83,7 @@ export async function GET(req: Request) {
                         tiktok_refresh_token: refreshToken || null,
                         tiktok_open_id: openId,
                         tiktok_token_expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
-                    }).eq('id', user.id);
+                    }).eq('user_id', user.id);
                     console.log(`[TIKTOK] Token saved to Supabase for user: ${user.id}`);
                 }
             } else {
