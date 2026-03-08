@@ -51,31 +51,41 @@ export async function GET() {
 
         const userData = userJson.data?.user;
 
-        // Fetch videos for view count
-        const videoResponse = await fetch('https://open.tiktokapis.com/v2/video/list/?fields=view_count', {
+        // Fetch videos for content display
+        const videoResponse = await fetch('https://open.tiktokapis.com/v2/video/list/?fields=view_count,cover_image_url,title,id,share_url', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ max_count: 10 })
+            body: JSON.stringify({ max_count: 12 })
         });
 
         const videoJson = await videoResponse.json();
         
         let totalViews = 0;
-        const videos = videoJson.data?.videos || [];
+        const videos = (videoJson.data?.videos || []).map((v: any) => ({
+            id: v.id,
+            image: v.cover_image_url,
+            caption: v.title || "",
+            likes: 0, // TikTok v2 basic fields don't include likes per video easily without specific permissions
+            comments: 0,
+            views: v.view_count,
+            permalink: v.share_url
+        }));
+
         if (videos.length > 0) {
-            totalViews = videos.reduce((acc: number, v: any) => acc + (v.view_count || 0), 0);
+            totalViews = videoJson.data.videos.reduce((acc: number, v: any) => acc + (v.view_count || 0), 0);
         }
 
         return NextResponse.json({
             followers: userData?.follower_count || 0,
             likes: userData?.likes_count || 0,
-            videos: userData?.video_count || 0,
+            videos_count: userData?.video_count || 0,
             views: totalViews,
             display_name: userData?.display_name || 'Automazioni AI',
-            avatar: userData?.avatar_url
+            avatar: userData?.avatar_url,
+            posts: videos
         });
 
     } catch (error: any) {

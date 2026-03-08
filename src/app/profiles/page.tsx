@@ -94,8 +94,9 @@ export default function ProfilesPage() {
     const [socialData, setSocialData] = useState<{
         tiktok: any;
         instagram: any;
+        facebook: any;
         loading: boolean;
-    }>({ tiktok: null, instagram: null, loading: true });
+    }>({ tiktok: null, instagram: null, facebook: null, loading: true });
 
     // Repurpose Flow States
     const [repurposeMode, setRepurposeMode] = useState<"disabled" | "config" | "loading" | "preview">("disabled");
@@ -109,9 +110,10 @@ export default function ProfilesPage() {
         async function fetchSocial() {
             setSocialData(prev => ({ ...prev, loading: true }));
             try {
-                const [ttRes, igRes] = await Promise.all([
+                const [ttRes, igRes, fbRes] = await Promise.all([
                     fetch('/api/tiktok/analytics'),
-                    fetch('/api/instagram/analytics')
+                    fetch('/api/instagram/analytics'),
+                    fetch('/api/facebook/analytics')
                 ]);
 
                 let ttData = null;
@@ -120,9 +122,13 @@ export default function ProfilesPage() {
                 let igData = null;
                 if (igRes.ok) igData = await igRes.json();
 
+                let fbData = null;
+                if (fbRes.ok) fbData = await fbRes.json();
+
                 setSocialData({
                     tiktok: ttData,
                     instagram: igData,
+                    facebook: fbData,
                     loading: false
                 });
             } catch (err) {
@@ -154,10 +160,10 @@ export default function ProfilesPage() {
             stats: {
                 followers: tt.followers >= 1000 ? `${(tt.followers / 1000).toFixed(1)}K` : tt.followers.toString(),
                 likes: tt.likes >= 1000 ? `${(tt.likes / 1000).toFixed(1)}K` : tt.likes.toString(),
-                posts: tt.videos?.toString() || "0",
+                posts: tt.videos_count?.toString() || "0",
                 engagement: "N/A"
             },
-            posts: [] // TikTok media not implemented yet in analytics endpoint
+            posts: tt.posts || []
         };
     } else if (selectedProfileId === 'ig-main' && socialData.instagram) {
         const ig = socialData.instagram;
@@ -170,12 +176,29 @@ export default function ProfilesPage() {
             stats: {
                 followers: ig.profile.followers >= 1000 ? `${(ig.profile.followers / 1000).toFixed(1)}K` : ig.profile.followers.toString(),
                 posts: ig.profile.media_count.toString(),
-                likes: "N/A", // Aggregated likes need complex calculation
+                likes: "N/A",
                 following: "N/A",
                 engagement: "N/A"
             },
             posts: ig.posts || [],
             biography: ig.profile.biography
+        };
+    } else if (selectedProfileId === 'facebook' && socialData.facebook) {
+        const fb = socialData.facebook;
+        profile = {
+            id: 'facebook',
+            name: fb.profile.name || "Automazioni AI",
+            handle: fb.profile.username || fb.profile.name,
+            platform: "Facebook",
+            image: fb.profile.profile_picture || "",
+            stats: {
+                followers: fb.profile.followers >= 1000 ? `${(fb.profile.followers / 1000).toFixed(1)}K` : fb.profile.followers.toString(),
+                posts: fb.posts?.length.toString() || "0",
+                likes: fb.profile.fans?.toString() || "0",
+                engagement: "N/A"
+            },
+            posts: fb.posts || [],
+            biography: fb.profile.about
         };
     }
 
@@ -215,6 +238,7 @@ export default function ProfilesPage() {
                     <SelectContent>
                         <SelectItem value="tiktok">TikTok: {socialData.tiktok?.display_name || "Automazioni AI"}</SelectItem>
                         <SelectItem value="ig-main">Instagram: {socialData.instagram?.profile.name || "Automazioni AI"}</SelectItem>
+                        <SelectItem value="facebook">Facebook: {socialData.facebook?.profile.name || "Automazioni AI"}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

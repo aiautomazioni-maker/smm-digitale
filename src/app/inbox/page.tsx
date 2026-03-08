@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Send, Image as ImageIcon, Smile, MoreVertical, MessageCircle, User, FileText, CheckCheck, X, ChevronLeft, Loader2 } from "lucide-react";
+import { Search, Send, Image as ImageIcon, Smile, MoreVertical, MessageCircle, User, FileText, CheckCheck, X, ChevronLeft, Loader2, Instagram, Facebook } from "lucide-react";
 import { useTranslation } from "@/context/LanguageContext";
 import {
     DropdownMenu,
@@ -26,8 +26,35 @@ import { toast } from "sonner";
 
 const COMMON_EMOJIS = ["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂", "😢", "😡", "👍", "✨", "🚀", "💯", "🙏", "✅", "📍", "👋", "💬", "🎁"];
 
+type Platform = 'instagram' | 'facebook' | 'tiktok';
+
+const INBOX_API: Record<Platform, string> = {
+    instagram: '/api/instagram/inbox',
+    facebook: '/api/facebook/inbox',
+    tiktok: '' // placeholder
+};
+
+const SEND_API: Record<Platform, string> = {
+    instagram: '/api/instagram/send-message',
+    facebook: '/api/facebook/send-message',
+    tiktok: '' // placeholder
+};
+
+const PLATFORM_LABELS: Record<Platform, string> = {
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    tiktok: 'TikTok'
+};
+
+const PLATFORM_COLORS: Record<Platform, string> = {
+    instagram: 'from-yellow-400 via-pink-500 to-purple-600',
+    facebook: 'from-blue-600 to-blue-400',
+    tiktok: 'from-black via-pink-500 to-teal-400'
+};
+
 export default function InboxPage() {
     const { t } = useTranslation();
+    const [activePlatform, setActivePlatform] = useState<Platform>('instagram');
     const [chats, setChats] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -85,11 +112,19 @@ export default function InboxPage() {
         }
     };
 
-    // Fetch real Instagram DMs on load
+    // Fetch inbox whenever platform changes
     useEffect(() => {
         async function loadInbox() {
+            if (activePlatform === 'tiktok') {
+                setChats([]);
+                setIsLoading(false);
+                return;
+            }
+            setIsLoading(true);
+            setChats([]);
+            setActiveChatId(null);
             try {
-                const res = await fetch('/api/instagram/inbox');
+                const res = await fetch(INBOX_API[activePlatform]);
                 const data = await res.json();
                 if (data.success && data.chats) {
                     setChats(data.chats);
@@ -97,17 +132,17 @@ export default function InboxPage() {
                         setActiveChatId(data.chats[0].id);
                     }
                 } else if (data.error) {
-                    toast.error("Errore nel caricamento messaggi: " + data.error);
+                    toast.error(`Errore ${PLATFORM_LABELS[activePlatform]}: ` + data.error);
                 }
             } catch (err) {
                 console.error("Failed to fetch inbox", err);
-                toast.error("Errore di connessione a Instagram.");
+                toast.error(`Errore di connessione a ${PLATFORM_LABELS[activePlatform]}.`);
             } finally {
                 setIsLoading(false);
             }
         }
         loadInbox();
-    }, []);
+    }, [activePlatform]);
 
     // Mobile View State
     const [showMobileChat, setShowMobileChat] = useState(false);
@@ -151,15 +186,16 @@ export default function InboxPage() {
         setIsSending(true);
         try {
             const recipientId = activeChat.recipientId || activeChat.user.id;
-            const res = await fetch('/api/instagram/send-message', {
+            const sendApi = SEND_API[activePlatform] || '/api/instagram/send-message';
+            const isInstagram = activePlatform === 'instagram';
+
+            const res = await fetch(sendApi, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    recipientId,
-                    message: messageText,
-                    mediaUrl: media?.url,
-                    mediaType: media?.type
-                })
+                body: JSON.stringify(isInstagram
+                    ? { recipientId, message: messageText, mediaUrl: media?.url, mediaType: media?.type }
+                    : { recipientId, message: messageText }
+                )
             });
             const data = await res.json();
             if (!data.success) {
@@ -204,15 +240,35 @@ export default function InboxPage() {
             {/* INBOX LIST (Left Column) */}
             <div className={`w-full md:w-80 border-r border-white/10 flex flex-col bg-black/20 ${showMobileChat ? "hidden md:flex" : "flex"}`}>
                 <div className="p-4 border-b border-white/10">
-                    <h2 className="text-xl font-bold mb-4">{t("nav.inbox")}</h2>
+                    <h2 className="text-xl font-bold mb-3">{t("nav.inbox")}</h2>
+                    <div className="flex gap-1 bg-white/5 rounded-xl p-1 mb-3">
+                        {(['instagram', 'facebook', 'tiktok'] as Platform[]).map(p => (
+                            <button
+                                key={p}
+                                type="button"
+                                onClick={() => { setActivePlatform(p); setShowEmojiPicker(false); }}
+                                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${activePlatform === p ? 'bg-white/15 text-white shadow' : 'text-muted-foreground hover:text-white'}`}
+                            >
+                                {PLATFORM_LABELS[p]}
+                            </button>
+                        ))}
+                    </div>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input placeholder="Cerca messaggi..." className="pl-9 bg-white/5 border-white/10" />
+                        <Input placeholder={`Cerca in ${PLATFORM_LABELS[activePlatform]}...`} className="pl-9 bg-white/5 border-white/10" />
                     </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                    {isLoading ? (
+                    {activePlatform === 'tiktok' ? (
+                        <div className="flex flex-col items-center text-center justify-center h-full p-8 text-muted-foreground">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-black via-pink-500 to-teal-400 flex items-center justify-center mb-4 shadow-lg">
+                                <span className="text-white font-bold text-2xl">TT</span>
+                            </div>
+                            <p className="text-sm font-semibold mb-1">TikTok DM in arrivo</p>
+                            <p className="text-xs">Le API TikTok per i DM sono in beta limitata. Connetti il tuo account nelle impostazioni per ricevere i messaggi qui.</p>
+                        </div>
+                    ) : isLoading ? (
                         <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
                             <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-500" />
                             <p className="text-sm">Caricamento messaggi...</p>
@@ -221,7 +277,7 @@ export default function InboxPage() {
                         <div className="flex flex-col items-center text-center justify-center h-full p-8 text-muted-foreground">
                             <MessageCircle className="w-12 h-12 mb-3 opacity-20" />
                             <p className="text-sm">La cartella è vuota.</p>
-                            <p className="text-xs mt-1">Non ci sono nuovi messaggi al momento.</p>
+                                    <p className="text-xs mt-1">Non ci sono nuovi messaggi su {PLATFORM_LABELS[activePlatform]}.</p>
                         </div>
                     ) : (
                         chats.map(chat => (
