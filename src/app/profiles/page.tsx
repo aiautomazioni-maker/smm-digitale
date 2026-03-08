@@ -16,6 +16,76 @@ import { useTranslation } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import { createRepurposePlan, RepurposePlanResponse } from "@/lib/story-engine";
 
+function ProfileCommentItem({ comment, postId }: { comment: any, postId: string }) {
+    const [isReplying, setIsReplying] = useState(false);
+    const [replyText, setReplyText] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleReply = async () => {
+        if (!replyText.trim()) return;
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/instagram/reply-comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentId: comment.id, message: replyText })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success("Risposta inviata!");
+                setReplyText("");
+                setIsReplying(false);
+            } else {
+                toast.error("Errore: " + (data.error || "Impossibile rispondere"));
+            }
+        } catch (err) {
+            toast.error("Errore di rete");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+            <div className="flex gap-3 text-sm">
+                <Avatar className="w-8 h-8"><AvatarFallback>{comment.user[0].toUpperCase()}</AvatarFallback></Avatar>
+                <div className="flex-1">
+                    <span className="font-semibold mr-2">{comment.user}</span>
+                    <span>{comment.text}</span>
+                    <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[10px] text-muted-foreground">{comment.time}</span>
+                        <button
+                            onClick={() => setIsReplying(!isReplying)}
+                            className="text-[10px] font-bold text-muted-foreground hover:text-white"
+                        >
+                            {isReplying ? "Annulla" : "Rispondi"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {isReplying && (
+                <div className="ml-11 flex gap-2 animate-in slide-in-from-top-1 duration-200">
+                    <Input
+                        autoFocus
+                        placeholder={`Rispondi a ${comment.user}...`}
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        className="h-8 bg-white/5 border-white/10 text-xs text-white"
+                        onKeyDown={e => e.key === 'Enter' && handleReply()}
+                    />
+                    <Button
+                        size="sm"
+                        className="h-8 bg-blue-600 hover:bg-blue-500 text-white"
+                        disabled={isSubmitting || !replyText.trim()}
+                        onClick={handleReply}
+                    >
+                        {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function ProfilesPage() {
     const { t } = useTranslation();
@@ -270,14 +340,7 @@ export default function ProfilesPage() {
 
                                                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                                                             {(post.commentList && post.commentList.length > 0) ? post.commentList.map((c: any, i: number) => (
-                                                                <div key={i} className="flex gap-3 text-sm">
-                                                                    <Avatar className="w-8 h-8"><AvatarFallback>{c.user[0].toUpperCase()}</AvatarFallback></Avatar>
-                                                                    <div>
-                                                                        <span className="font-semibold mr-2">{c.user}</span>
-                                                                        <span>{c.text}</span>
-                                                                        <p className="text-[10px] text-muted-foreground mt-1">{c.time}</p>
-                                                                    </div>
-                                                                </div>
+                                                                <ProfileCommentItem key={i} comment={c} postId={post.id} />
                                                             )) : (
                                                                 <p className="text-sm text-muted-foreground text-center py-10">Nessun commento disponibile o simulazione dati limitata.</p>
                                                             )}

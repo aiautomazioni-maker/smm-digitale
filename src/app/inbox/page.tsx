@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,12 +24,66 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
+const COMMON_EMOJIS = ["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂", "😢", "😡", "👍", "✨", "🚀", "💯", "🙏", "✅", "📍", "👋", "💬", "🎁"];
+
 export default function InboxPage() {
     const { t } = useTranslation();
     const [chats, setChats] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState("");
+    const [isSending, setIsSending] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [pendingMedia, setPendingMedia] = useState<{ url: string, type: string, name: string } | null>(null);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleEmojiClick = (emoji: string) => {
+        setNewMessage(prev => prev + emoji);
+        setShowEmojiPicker(false);
+    };
+
+    const handleMediaClick = () => {
+        console.log("[INBOX] Media icon clicked, triggering file input...");
+        if (!fileInputRef.current) {
+            console.error("[INBOX] fileInputRef.current is NULL!");
+        }
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        console.log("[INBOX] File selected:", file?.name);
+        if (!file) return;
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/instagram/upload-media', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                setPendingMedia({
+                    url: data.url,
+                    type: file.type.startsWith('video') ? 'video' : 'image',
+                    name: file.name
+                });
+                toast.success("Media caricato con successo");
+            } else {
+                toast.error("Errore caricamento: " + data.error);
+            }
+        } catch (err) {
+            toast.error("Errore di rete durante il caricamento.");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     // Fetch real Instagram DMs on load
     useEffect(() => {
@@ -64,27 +118,62 @@ export default function InboxPage() {
 
     const activeChat = chats.find(c => c.id === activeChatId);
 
-    const handleSendMessage = (e?: React.FormEvent) => {
+    const handleSendMessage = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (!newMessage.trim() || !activeChat) return;
+        if ((!newMessage.trim() && !pendingMedia) || !activeChat || isSending) return;
 
-        const updatedChats = chats.map(chat => {
+        const messageText = newMessage;
+        const media = pendingMedia;
+
+        setNewMessage("");
+        setPendingMedia(null);
+
+        // Optimistically add message to UI
+        const optimisticId = Date.now();
+        setChats(prev => prev.map(chat => {
             if (chat.id === activeChatId) {
+                const newMsg = {
+                    id: optimisticId,
+                    text: media ? `[Media: ${media.name}] ${messageText}` : messageText,
+                    sender: "me",
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
                 return {
                     ...chat,
-                    messages: [
-                        ...chat.messages,
-                        { id: Date.now(), text: newMessage, sender: "me", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-                    ],
-                    lastMessage: newMessage,
+                    messages: [...chat.messages, newMsg],
+                    lastMessage: newMsg.text,
                     time: "Ora"
                 };
             }
             return chat;
-        });
+        }));
 
-        setChats(updatedChats);
-        setNewMessage("");
+        setIsSending(true);
+        try {
+            const recipientId = activeChat.recipientId || activeChat.user.id;
+            const res = await fetch('/api/instagram/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    recipientId,
+                    message: messageText,
+                    mediaUrl: media?.url,
+                    mediaType: media?.type
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                toast.error("Errore nell'invio: " + (data.error || 'Errore sconosciuto'));
+                setChats(prev => prev.map(chat => ({
+                    ...chat,
+                    messages: chat.messages.filter((m: any) => m.id !== optimisticId)
+                })));
+            }
+        } catch (err) {
+            toast.error("Errore di rete nell'invio del messaggio.");
+        } finally {
+            setIsSending(false);
+        }
     };
 
     const handleSelectChat = (id: string) => {
@@ -229,27 +318,94 @@ export default function InboxPage() {
 
                         {/* Message Composer */}
                         <div className="p-4 border-t border-white/10 bg-black/40 backdrop-blur-xl">
+                            {/* Media Preview */}
+                            {pendingMedia && (
+                                <div className="mb-3 p-2 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                            {pendingMedia.type === 'video' ? <FileText className="w-5 h-5" /> : <ImageIcon className="w-5 h-5" />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-medium truncate">{pendingMedia.name}</p>
+                                            <p className="text-[10px] text-blue-300">Pronto per essere inviato</p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 rounded-full hover:bg-blue-500/30"
+                                        onClick={() => setPendingMedia(null)}
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
+
+                            {/* Emoji Picker */}
+                            {showEmojiPicker && (
+                                <div className="mb-3 p-3 bg-zinc-900 border border-white/10 rounded-2xl grid grid-cols-10 gap-1 animate-in zoom-in-95 duration-200 origin-bottom-left shadow-2xl">
+                                    {COMMON_EMOJIS.map(emoji => (
+                                        <button
+                                            key={emoji}
+                                            type="button"
+                                            onClick={() => handleEmojiClick(emoji)}
+                                            className="text-xl hover:scale-125 transition-transform leading-none p-1 rounded hover:bg-white/10"
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*,video/*"
+                                className="hidden"
+                                onChange={handleFileSelected}
+                            />
                             <form onSubmit={handleSendMessage} className="flex items-end gap-2 bg-white/5 border border-white/10 rounded-3xl p-2 px-4 focus-within:ring-1 focus-within:ring-white/20 transition-all">
                                 <div className="flex gap-2 pb-1 text-muted-foreground shrink-0">
-                                    <Smile className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-                                    <ImageIcon className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            console.log("[INBOX] Smile clicked");
+                                            setShowEmojiPicker(prev => !prev);
+                                        }}
+                                        className={`transition-colors ${showEmojiPicker ? 'text-blue-400' : 'hover:text-white'}`}
+                                    >
+                                        <Smile className="w-5 h-5" />
+                                    </button>
+                                    {isUploading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={handleMediaClick}
+                                            className={`transition-colors ${pendingMedia ? 'text-blue-400' : 'hover:text-white'}`}
+                                        >
+                                            <ImageIcon className="w-5 h-5" />
+                                        </button>
+                                    )}
                                 </div>
                                 <Input
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder="Scrivi un messaggio..."
+                                    placeholder={pendingMedia ? "Aggiungi una didascalia..." : "Scrivi un messaggio..."}
                                     className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 h-8"
                                 />
                                 <Button
                                     type="submit"
-                                    disabled={!newMessage.trim()}
+                                    disabled={(!newMessage.trim() && !pendingMedia) || isSending || isUploading}
                                     size="icon"
-                                    className={`h-8 w-8 rounded-full shrink-0 transition-all ${newMessage.trim()
+                                    className={`h-8 w-8 rounded-full shrink-0 transition-all ${((newMessage.trim() || pendingMedia) && !isSending && !isUploading)
                                         ? "bg-blue-600 hover:bg-blue-500 text-white"
                                         : "bg-white/10 text-white/40"
                                         }`}
                                 >
-                                    <Send className="w-4 h-4 ml-0.5" />
+                                    {isSending
+                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                        : <Send className="w-4 h-4 ml-0.5" />
+                                    }
                                 </Button>
                             </form>
                             <p className="text-[10px] text-center text-muted-foreground mt-2">I messaggi verranno inviati come {activeChat.user.platform === 'instagram' ? '@automazioniai' : 'Automazioni AI Official'}</p>

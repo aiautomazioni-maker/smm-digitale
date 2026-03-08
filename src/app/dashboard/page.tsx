@@ -5,10 +5,84 @@ import { useTranslation } from "@/context/LanguageContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Calendar as CalendarIcon, MessageCircle, Heart, Share2, MoreHorizontal, MessageSquare, ArrowRight } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, MessageCircle, Heart, Share2, MoreHorizontal, MessageSquare, ArrowRight, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { EngagementChart } from "@/components/dashboard/EngagementChart";
+import { toast } from "sonner";
+
+function DashboardCommentItem({ comment }: { comment: any }) {
+    const [isReplying, setIsReplying] = useState(false);
+    const [replyText, setReplyText] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleReply = async () => {
+        if (!replyText.trim()) return;
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/instagram/reply-comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentId: comment.id, message: replyText })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success("Risposta inviata!");
+                setReplyText("");
+                setIsReplying(false);
+            } else {
+                toast.error("Errore: " + (data.error || "Impossibile rispondere"));
+            }
+        } catch (err) {
+            toast.error("Errore di rete nell'invio della risposta");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+            <div className="flex gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                <Avatar className="w-8 h-8 shrink-0">
+                    <AvatarFallback>{comment.username?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                        <p className="text-xs font-bold">{comment.username || "Utente"}</p>
+                        <button
+                            onClick={() => setIsReplying(!isReplying)}
+                            className="text-[10px] text-blue-400 hover:text-blue-300 font-bold"
+                        >
+                            {isReplying ? "Annulla" : "Rispondi"}
+                        </button>
+                    </div>
+                    <p className="text-sm mt-0.5 text-white/90 truncate">{comment.text}</p>
+                </div>
+            </div>
+            {isReplying && (
+                <div className="flex gap-2 animate-in slide-in-from-top-1 px-1">
+                    <Input
+                        autoFocus
+                        placeholder="Scrivi una risposta..."
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        className="h-8 bg-white/5 border-white/10 text-xs text-white"
+                        onKeyDown={(e) => e.key === 'Enter' && handleReply()}
+                    />
+                    <Button
+                        size="sm"
+                        className="h-8 bg-blue-600 hover:bg-blue-500 text-white shrink-0"
+                        disabled={isSubmitting || !replyText.trim()}
+                        onClick={handleReply}
+                    >
+                        {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 
 export default function DashboardPage() {
@@ -173,16 +247,7 @@ export default function DashboardPage() {
                             <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>
                         ) : tiktokData?.recent_comments && tiktokData.recent_comments.length > 0 ? (
                             tiktokData.recent_comments.map((comment: any, idx: number) => (
-                                <div key={idx} className="flex gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
-                                    <Avatar className="w-8 h-8 shrink-0">
-                                        <AvatarFallback>{comment.username?.[0]?.toUpperCase() || "U"}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="text-xs font-bold">{comment.username || "Utente"}</p>
-                                        <p className="text-sm mt-0.5 text-white/90">{comment.text}</p>
-                                        <p className="text-[10px] text-muted-foreground mt-1">Sui tuoi post recenti</p>
-                                    </div>
-                                </div>
+                                <DashboardCommentItem key={idx} comment={comment} />
                             ))
                         ) : (
                             <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-center">

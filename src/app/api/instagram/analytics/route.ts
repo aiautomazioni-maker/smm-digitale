@@ -30,6 +30,7 @@ export async function GET() {
                 likes: m.like_count || 0,
                 comments: m.comments_count || 0,
                 commentList: (m.comments?.data || []).map((c: any) => ({
+                    id: c.id,
                     user: c.username,
                     text: c.text,
                     time: new Date(c.timestamp).toLocaleString('it-IT', { day: '2-digit', month: 'short' })
@@ -44,6 +45,7 @@ export async function GET() {
             if (post.commentList) {
                 post.commentList.forEach((c: any) => {
                     allComments.push({
+                        id: c.id,
                         username: c.user,
                         text: c.text,
                         timestamp: post.timestamp // We'll just use post timestamp or parse it if we had precise comment timestamps
