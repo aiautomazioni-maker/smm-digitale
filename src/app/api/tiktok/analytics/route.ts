@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Tries to refresh the TikTok access token using the stored refresh token.
  * Returns the new access token if successful, null otherwise.
@@ -69,7 +71,12 @@ async function tryRefreshToken(supabase: any, refreshToken: string, profileId?: 
 export async function GET() {
     try {
         const cookieStore = await cookies();
-        let accessToken = cookieStore.get('tiktok_access_token')?.value;
+        let accessToken = null;
+        try {
+            accessToken = cookieStore.get('tiktok_access_token')?.value;
+        } catch (e) {
+            // Ignore cookie parsing error
+        }
 
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
