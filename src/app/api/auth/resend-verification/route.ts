@@ -42,7 +42,9 @@ export async function POST(req: Request) {
                 email_verification_expires_at: refreshResult.verification.expires_at_iso
             });
 
-            const verifyLink = `http://localhost:3000/verify?token=${rawToken}&email=${encodeURIComponent(email)}`;
+            const url = new URL(req.url);
+            const origin = `${url.protocol}//${url.host}`;
+            const verifyLink = `${origin}/verify?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
             const emailContent = generateVerificationEmail({
                 lang: "it",

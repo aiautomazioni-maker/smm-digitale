@@ -65,8 +65,9 @@ export async function POST(req: Request) {
         });
 
         // 5. Generate Verification Link & Email
-        // Localhost:
-        const verifyLink = `http://localhost:3000/verify?token=${token}&email=${encodeURIComponent(validationResult.normalized.email)}`;
+        const url = new URL(req.url);
+        const origin = `${url.protocol}//${url.host}`;
+        const verifyLink = `${origin}/verify?token=${token}&email=${encodeURIComponent(validationResult.normalized.email)}`;
 
         const emailContent = generateVerificationEmail({
             lang: "it", // Default to IT for now
@@ -92,12 +93,7 @@ ${emailContent.email.body_text}
 `;
         console.log(logContent);
 
-        // Append to email_debug.log
-        try {
-            fs.appendFileSync(path.join(process.cwd(), 'email_debug.log'), logContent);
-        } catch (err) {
-            console.error("Failed to write to email_debug.log", err);
-        }
+        console.log(logContent);
 
         // Simulate DB delay
         await new Promise(resolve => setTimeout(resolve, 1000));

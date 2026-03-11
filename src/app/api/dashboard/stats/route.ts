@@ -8,7 +8,8 @@ export async function GET() {
     const users = getAllUsers();
     // In a real app we'd get the current user session, but for now we use the main test user
     const user = users.find(u => u.email === "testuser@example.com");
-    const userCredits = user ? user.credits || 0 : 0;
+    // Fallback to 500 credits if test user not found (e.g. in production mock DB)
+    const userCredits = user ? user.credits || 0 : 500;
 
     let instagramFollowers = 0;
     let tiktokFollowers = 0;
