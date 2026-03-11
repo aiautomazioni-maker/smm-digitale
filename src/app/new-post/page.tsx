@@ -510,7 +510,7 @@ function NewPostWizardInner() {
                                 </div>
                                 <Button variant="outline" onClick={() => handleRepurpose({
                                     content_type: "post",
-                                    caption: "Ecco 3 motivi per usare l'AI nel marketing nel 2026. #marketingai #smm",
+                                    caption: "Ecco 3 motivi per usare l'AI nel marketing nel 2026. #marketingai #automazioniai",
                                     media_urls: ["https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800"]
                                 })}>
                                     Usa Post Recente (Demo)
@@ -795,7 +795,7 @@ function NewPostWizardInner() {
                 <div className="p-4 flex items-center gap-3 border-b border-white/10">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 to-pink-600 flex items-center justify-center p-0.5">
                         <div className="w-full h-full bg-black rounded-full overflow-hidden">
-                            <img src="https://ui-avatars.com/api/?name=SMM&background=random" className="w-full h-full object-cover" />
+                            <img src="https://ui-avatars.com/api/?name=AAI&background=random" className="w-full h-full object-cover" />
                         </div>
                     </div>
                     <div className="text-left leading-tight">

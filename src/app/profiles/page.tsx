@@ -345,7 +345,7 @@ export default function ProfilesPage() {
                                             animate={{ opacity: 1 }}
                                             className="aspect-square relative group cursor-pointer overflow-hidden rounded-md bg-muted"
                                         >
-                                            <img src={post.image} alt="Post" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
+                                            <img src={post.image || undefined} alt="Post" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white font-bold">
                                                 <div className="flex items-center gap-1"><Heart className="w-5 h-5 fill-white" /> {post.likes}</div>
                                                 <div className="flex items-center gap-1"><MessageCircle className="w-5 h-5 fill-white" /> {post.comments}</div>

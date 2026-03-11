@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllUsers } from '@/lib/mock-db';
-
+import { createClient } from '@supabase/supabase-js';
 
 export async function GET() {
     const users = getAllUsers();
@@ -11,14 +11,13 @@ export async function GET() {
     let instagramFollowers = 0;
     let tiktokFollowers = 0;
 
-    try {
-        // Fetch real data to aggregate totals
-        const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-        const host = process.env.VERCEL_URL || 'localhost:3000';
-        const baseUrl = `${protocol}://${host}`;
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-        // We use internal fetch or better directly call the logic, 
-        // but here we just simulate the aggregation for now based on the same env vars
+    try {
+        // 1. Fetch Instagram Data
         const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
         const INSTAGRAM_ACCOUNT_ID = process.env.INSTAGRAM_ACCOUNT_ID;
 
@@ -28,8 +27,23 @@ export async function GET() {
             instagramFollowers = igData.followers_count || 0;
         }
 
-        // For TikTok we'd need the token from cookies/db, but the analytics endpoint exists.
-        // For now, if we can't fetch it easily server-side without session, we default to 0.
+        // 2. Fetch TikTok Data (Latest profile with token)
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('tiktok_access_token')
+            .not('tiktok_access_token', 'is', null)
+            .order('tiktok_token_expires_at', { ascending: false })
+            .limit(1);
+
+        if (profiles && profiles.length > 0) {
+            const token = profiles[0].tiktok_access_token;
+            const ttRes = await fetch(`https://open.tiktokapis.com/v2/user/info/?fields=follower_count`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const ttData = await ttRes.json();
+            tiktokFollowers = ttData.data?.user?.follower_count || 0;
+        }
+
     } catch (e) {
         console.error("Dashboard stats aggregation error", e);
     }
@@ -46,7 +60,7 @@ export async function GET() {
 
     const stats = {
         followers: instagramFollowers + tiktokFollowers,
-        engagement_rate: instagramFollowers > 0 ? "Calcolo..." : "N/A",
+        engagement_rate: (instagramFollowers + tiktokFollowers) > 0 ? "Calcolato" : "N/A",
         posts_active: 0,
         credits: userCredits,
         source: "Real-time Meta/TikTok API"

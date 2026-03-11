@@ -469,7 +469,7 @@ export async function POST(req: Request) {
                     },
                     body: JSON.stringify({
                         post_info: {
-                            title: payload.caption_final ? payload.caption_final.substring(0, 150) : "Video from SMM Digitale",
+                            title: payload.caption_final ? payload.caption_final.substring(0, 150) : "Video from Automazioni AI",
                             privacy_level: "SELF_ONLY" // Force SELF_ONLY for Sandbox
                         },
                         source_info: {

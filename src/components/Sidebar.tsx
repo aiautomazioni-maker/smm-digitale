@@ -21,8 +21,10 @@ export function Sidebar() {
     const { t } = useTranslation();
 
     const [credits, setCredits] = useState<number | null>(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         async function fetchCredits() {
             try {
                 // We use the dashboard stats API as it's the most convenient place where user stats are aggregated
@@ -150,7 +152,7 @@ export function Sidebar() {
                     <div className="mt-4 flex flex-col items-center gap-2">
                         <LanguageSwitcher />
                         <span className="text-[10px] text-muted-foreground opacity-30 mt-2 italic">
-                            Ultimo Aggiornamento: {new Date().toLocaleTimeString('it-IT')}
+                            Ultimo Aggiornamento: {mounted ? new Date().toLocaleTimeString('it-IT') : ''}
                         </span>
                     </div>
                 </div>

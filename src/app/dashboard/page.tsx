@@ -90,47 +90,34 @@ export default function DashboardPage() {
     const [tiktokData, setTiktokData] = useState<{ followers: number, views: number, likes: number, videos: number, display_name?: string, recent_comments?: any[] } | null>(null);
     const [dashboardStats, setDashboardStats] = useState<any>(null);
     const [dashboardInbox, setDashboardInbox] = useState<any[]>([]); // New state for DMs
+    const [recentComments, setRecentComments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchAnalytics() {
+            const endpoints = [
+                { name: 'TikTok', url: '/api/tiktok/analytics', setter: setTiktokData },
+                { name: 'Stats', url: '/api/dashboard/stats', setter: setDashboardStats },
+                { name: 'Instagram', url: '/api/instagram/analytics', setter: (data: any) => data.recent_comments && setRecentComments(data.recent_comments) },
+                { name: 'Inbox', url: '/api/instagram/inbox', setter: (data: any) => data.success && data.chats && setDashboardInbox(data.chats.slice(0, 3)) }
+            ];
+
             try {
-                const [ttRes, statsRes, igRes, inboxRes] = await Promise.all([
-                    fetch('/api/tiktok/analytics'),
-                    fetch('/api/dashboard/stats'),
-                    fetch('/api/instagram/analytics'),
-                    fetch('/api/instagram/inbox') // Fetch real DMs
-                ]);
-
-                if (ttRes.ok) {
-                    const data = await ttRes.json();
-                    setTiktokData(data); // Will hold TikTok specific stats
-                }
-
-                if (statsRes.ok) {
-                    const data = await statsRes.json();
-                    setDashboardStats(data);
-                }
-
-                if (igRes.ok) {
-                    const igData = await igRes.json();
-                    if (igData.success || igData.recent_comments) {
-                        setTiktokData(prev => ({
-                            ...(prev || { followers: 0, views: 0, likes: 0, videos: 0 }),
-                            recent_comments: igData.recent_comments || []
-                        }));
+                await Promise.all(endpoints.map(async ({ name, url, setter }) => {
+                    try {
+                        const res = await fetch(url);
+                        if (res.ok) {
+                            const data = await res.json();
+                            setter(data);
+                        } else {
+                            console.warn(`[DASHBOARD] ${name} fetch returned ${res.status}`);
+                        }
+                    } catch (e) {
+                        console.error(`[DASHBOARD] ${name} Failed to fetch:`, e);
                     }
-                }
-
-                if (inboxRes.ok) {
-                    const inboxData = await inboxRes.json();
-                    if (inboxData.success && inboxData.chats) {
-                        setDashboardInbox(inboxData.chats.slice(0, 3)); // Store latest 3 chats
-                    }
-                }
-
+                }));
             } catch (err) {
-                console.error("Failed to fetch analytics", err);
+                console.error("Critical error in dashboard fetch loop", err);
             } finally {
                 setIsLoading(false);
             }
@@ -189,10 +176,10 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? "..." : (dashboardStats?.stats?.followers >= 1000 ? `${(dashboardStats.stats.followers / 1000).toFixed(1)}K` : (dashboardStats?.stats?.followers || "0"))}
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (dashboardStats?.stats?.followers >= 1000 ? `${(dashboardStats.stats.followers / 1000).toFixed(1)}K` : (dashboardStats?.stats?.followers || "0"))}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {dashboardStats?.stats?.followers !== undefined ? "Dati aggregati reali" : "Social non connessi"}
+                            {dashboardStats?.stats?.followers !== undefined ? "Dati reali aggregati" : "In attesa di connessione..."}
                         </p>
                     </CardContent>
                 </Card>
@@ -203,10 +190,10 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? "..." : (tiktokData !== null ? (tiktokData.views >= 1000 ? `${(tiktokData.views / 1000).toFixed(1)}K` : tiktokData.views) : "N / A")}
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (tiktokData !== null ? (tiktokData.views >= 1000 ? `${(tiktokData.views / 1000).toFixed(1)}K` : tiktokData.views) : "0")}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {tiktokData !== null ? `Ultimi video: ${tiktokData.videos}` : "Configura account"}
+                            {tiktokData?.display_name ? `Profilo: ${tiktokData.display_name}` : "Caricamento profilo..."}
                         </p>
                     </CardContent>
                 </Card>
@@ -245,8 +232,8 @@ export default function DashboardPage() {
                     <CardContent className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                         {isLoading ? (
                             <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>
-                        ) : tiktokData?.recent_comments && tiktokData.recent_comments.length > 0 ? (
-                            tiktokData.recent_comments.map((comment: any, idx: number) => (
+                        ) : recentComments && recentComments.length > 0 ? (
+                            recentComments.map((comment: any, idx: number) => (
                                 <DashboardCommentItem key={idx} comment={comment} />
                             ))
                         ) : (

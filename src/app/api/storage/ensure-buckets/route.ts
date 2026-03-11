@@ -8,6 +8,7 @@ export async function GET() {
         const BUCKETS = [
             { name: 'video-uploads', public: true },
             { name: 'story-images', public: true },
+            { name: 'instagram-attachments', public: true },
         ];
 
         const results = [];

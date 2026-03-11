@@ -13,10 +13,14 @@ export function EngagementChart() {
         async function fetchData() {
             try {
                 const res = await fetch('/api/dashboard/stats');
-                const json = await res.json();
-                setData(json.chartData);
+                if (res.ok) {
+                    const json = await res.json();
+                    setData(json.chartData);
+                } else {
+                    console.warn("[CHART] Stats returned", res.status);
+                }
             } catch (e) {
-                console.error("Failed to fetch stats", e);
+                console.error("[CHART] Failed to fetch stats:", e);
             } finally {
                 setLoading(false);
             }

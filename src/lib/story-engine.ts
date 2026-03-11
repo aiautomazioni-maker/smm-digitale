@@ -459,7 +459,7 @@ export interface RepurposeRenderJobsResponse {
 
 /**
  * Traduce il piano di repurpose in job tecnici per l'engine grafico.
- * Implementato seguendo il json spec fornito dal cliente coerentemente a SMM Digitale.
+ * Implementato seguendo il json spec fornito dal cliente coerentemente a Automazioni AI.
  */
 export function createRepurposeRenderJobs(
     repurposePlan: RepurposePlanResponse['repurpose_plan'],

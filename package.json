@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:webpack": "next dev -p 3000 --experimental-https=false 2>&1",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

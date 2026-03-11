@@ -68,7 +68,7 @@ async function tryRefreshToken(supabase: any, refreshToken: string, profileId?: 
     }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
         const cookieStore = await cookies();
         let accessToken = null;
@@ -138,14 +138,20 @@ export async function GET() {
 
         const userJson = await userResponse.json();
 
-        if (userJson.error) {
+        if (userJson.error && userJson.error.code !== 'ok') {
             console.error('[TIKTOK_API_ERROR]', userJson.error);
-            // Token may be invalid, try to refresh once more if we have a refresh token
-            if (refreshToken) {
+            
+            // Check if we already tried an emergency refresh to avoid infinite loops
+            const url = new URL(req.url);
+            const isEmergencyRefresh = url.searchParams.get('refreshed') === 'true';
+
+            if (refreshToken && !isEmergencyRefresh) {
                 console.log('[TIKTOK] API error, attempting emergency refresh...');
                 const newToken = await tryRefreshToken(supabase, refreshToken, profileId);
                 if (newToken) {
-                    return NextResponse.redirect(new URL('/api/tiktok/analytics', process.env.VERCEL_URL || 'http://localhost:3000'));
+                    const redirectUrl = new URL(req.url);
+                    redirectUrl.searchParams.set('refreshed', 'true');
+                    return NextResponse.redirect(redirectUrl);
                 }
             }
             return NextResponse.json({
