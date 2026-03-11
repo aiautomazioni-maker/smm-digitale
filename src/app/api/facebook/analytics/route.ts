@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
     const FB_PAGE_ID = process.env.FB_PAGE_ID;
