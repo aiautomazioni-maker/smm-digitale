@@ -18,6 +18,20 @@ export async function POST(req: Request) {
         const { platform, workspace_id, post, schedule } = body;
         const payload = normalized.publish_payload;
 
+        // --- DRY RUN SUPPORT ---
+        if (body.dry_run) {
+            console.log("🚀 [PUBLISH DRY-RUN] Logging payload instead of calling external APIs:");
+            console.log(JSON.stringify(payload, null, 2));
+            return NextResponse.json({
+                success: true,
+                dry_run: true,
+                message: "Dry run successful. No external APIs were called.",
+                normalized_payload: payload,
+                warnings: normalized.warnings
+            });
+        }
+        // -----------------------
+
         if (!payload.media_urls.length || !payload.platform) {
             return NextResponse.json({ error: 'Missing data' }, { status: 400 });
         }
